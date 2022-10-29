@@ -1,0 +1,432 @@
+" Vim cheatsheet: https://devhints.io/vim
+" For a split window: use Ctrl-w + and Ctrl-w - to resize the height of the current window by a single row. 
+" For a vsplit window: use Ctrl-w > and Ctrl-w < to resize the width of the current window by a single column
+
+set termguicolors
+set number 			" Show linenumbers
+set hlsearch 			" Highlight current search
+set backspace=2
+set backspace=indent,eol,start 	" Fix backspace in insert mode
+set wildmenu
+set wildmode=longest:full,full 	" Autocomplete in command mode
+set mouse=a 			" Allows using the mouse. Note this prevents copying to system clipboard, so if you want to do that you need to set mouse=r
+
+" When pasting code, indentation can be broken without setting 'paste'
+" F2 in normal mode will invert the 'paste' option, and will show the option value
+nnoremap <F2> :set invpaste paste?<CR>
+set pastetoggle=<F2> 	" F2 toggles 'paste' in insert mode
+set showmode 		" Shows 'paste' value in insert mode
+
+" Map Ctrl-z, Ctrl-y to undo, redo, Ctrl-a to select all, Ctrl-s to save
+nnoremap <C-Z> u
+nnoremap <C-Y> <C-R>
+inoremap <C-Z> <C-O>u
+inoremap <C-Y> <C-O><C-R>
+nnoremap <C-A> ggVG 
+nnoremap <C-s> :w<CR>
+
+" Indentation config unnecessary because of vim-sleuth
+" filetype plugin indent on
+" set tabstop=4 	" Show existing tab with 4 spaces width
+" set shiftwidth=4 	" When indenting with '>', use 4 spaces width
+" set expandtab 	" On pressing tab, insert 4 spaces
+" Spell checking and word completion are unnecessary, using coc for that
+" setlocal spell
+" set complete+=kspell
+" set viminfo='100,n$HOME/.vim/viminfo " viminfo files save state and histories (command line, search, input), irrelevant for nvim
+
+" vim-buffet colors
+" Note: Make sure the function is defined before `vim-buffet` is loaded.
+function! g:BuffetSetCustomColors()
+  hi! BuffetCurrentBuffer cterm=NONE ctermbg=5 ctermfg=8 guibg=#98C379 guifg=#323A3F
+  hi! BuffetActiveBuffer cterm=NONE ctermbg=5 ctermfg=8 guibg=#2C323C guifg=#98C379
+  hi! BuffetBuffer cterm=NONE ctermbg=5 ctermfg=8 guibg=#2C323C guifg=#ABB2BF
+  " BuffetTabs are the weird leftmost squares in the tab-bar
+  hi! BuffetTab cterm=NONE ctermbg=5 ctermfg=8 guibg=#3E4452 guifg=#ABB2BF
+endfunction
+
+" Install vim-plug
+if empty(glob('$HOME/.vim/autoload/plug.vim'))
+  silent execute '!curl -fLo '.glob('$HOME').'/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+endif
+
+" Run PlugInstall if there are missing plugins
+autocmd VimEnter * if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
+  \| PlugInstall --sync | source $MYVIMRC
+  \| endif
+
+" Install plugins
+call plug#begin('$HOME/.vim/plugged')
+    Plug 'rhysd/vim-grammarous'         " Human-language grammar checking, see [this](http://www.languagetool.org). This is interchangable with coc-ltex.
+    Plug 'bagrat/vim-buffet'            " Nice tab (and buffer) bar
+    Plug 'puremourning/vimspector'      " Debugger. On NeoVim, might require installing [pynvim](https://github.com/neovim/pynvim) or setting 'let g:python3_host_prog=~/path/to/python3.exe'
+    Plug 'TovarishFin/vim-solidity'     " Solidity syntax-highlighting
+    Plug 'tpope/vim-obsession'          " Session management (saves Vim's state)
+    Plug 'vim-scripts/SearchComplete'   " Autocomplete in search-mode (/) using TAB
+    Plug 'majutsushi/tagbar', { 'on': 'TagbarToggle' } " Programming file overview (variables, functions, etc)
+    Plug 'matze/vim-move', { 'on': ['<Plug>MoveLineDown', '<Plug>MoveLineUp', '<Plug>MoveBlockDown', '<Plug>MoveBlockUp', '<Plug>MoveBlockLeft', '<Plug>MoveBlockRight'] } 		" Moves selection using Alt-ArrowKeys
+    Plug 'mhinz/vim-startify' 		" Fancy start screen that shows recent files, sessions, etc
+    " Plug 'wellle/tmux-complete.vim' 	" Completes all words visible in your Tmux panes. In insert mode, start typing any word you see and press <C-X><C-U> to the trigger user defined insert mode completion.
+    Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' } " Shows an undo history tree (Alt-z)
+    Plug 'tpope/vim-sleuth'             " Automatically adjusts shiftwidth and expandtab based on the current file. If is blank, based on other files from the same directory
+    Plug 'tpope/vim-fugitive'           " Git integration (:Git commit, :Git <some-git-command>)
+    Plug 'machakann/vim-highlightedyank' " Highlights last yank
+    Plug 'sbdchd/neoformat', { 'on': 'Neoformat' } " Formats code (:Neoformat)
+    Plug 'vim-test/vim-test'            " Testing framework
+    Plug 'https://github.com/sevko/vim-nand2tetris-syntax.git', { 'for': ['hdl', 'hack', 'asm', 'vm', 'jack', 'tst'] } " NAND2TETRIS syntax highlighting, only open for nand2tet files
+    Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown']} " Live preview for markdown
+    Plug 'junegunn/fzf', { 'do': { -> fzf#install() } } " Make sure you have latest version of the fzf binary. fzf is a command-line fuzzy finder
+    Plug 'junegunn/fzf.vim'             " vim-fzf integration
+    Plug 'neoclide/coc.nvim', {'branch': 'release'} " Language server provider (<leader>+a to invoke codeAction, <leader> is usually '\')
+    Plug 'vim-airline/vim-airline'      " Nice statusbar / tabline
+    Plug 'lervag/vimtex', { 'for': 'tex' }  " Tex support, load only when .tex file is opened
+    Plug 'luochen1990/rainbow'          " Color-codes matching parentheses
+    Plug 'mg979/vim-visual-multi', {'branch': 'master'}         " Multiple cursors (Ctrl+d to mark the next occurence, Ctrl+Shift+l to select all occurences, Ctrl+Alt+up/down arrows to select previous/next line)
+    Plug 'preservim/nerdtree', { 'on': 'NERDTreeToggle' } " Opens a file-tree (Ctrl+o)
+    Plug 'jiangmiao/auto-pairs'         " Auto pairs for (, [, ', etc
+    Plug 'scrooloose/nerdcommenter'     ", { 'on': ['<Plug>NERDCommenterToggle', '<Plug>NERDCommenterToggle<CR>gv'] }      For easy commenting (Ctrl+/)
+    Plug 'joshdick/onedark.vim'         " Onedark theme
+    Plug 'ryanoasis/vim-devicons'       " Nice icons
+call plug#end()
+
+function! OnVimEnter() abort
+  if exists('g:plug_home') 	" Run PlugUpdate every week automatically when entering Vim.
+    let l:filename = printf('%s/.vim_plug_update', g:plug_home)
+    if filereadable(l:filename) == 0
+      call writefile([], l:filename)
+    endif
+    let l:this_week = strftime('%Y_%V')
+    let l:contents = readfile(l:filename)
+    if index(l:contents, l:this_week) < 0
+      call execute('PlugUpdate')
+      call writefile([l:this_week], l:filename, 'a')
+    endif
+  endif
+endfunction
+autocmd VimEnter * call OnVimEnter()
+
+" NERDTree Ctrl-o shows file browser
+map <C-o> :NERDTreeToggle<CR> 
+
+" onedark colorscheme
+set background=dark
+colorscheme onedark 
+let g:airline_theme='onedark'
+
+" tagbar
+if !empty(glob("~/.local/bin/homebrew/bin/ctags"))
+  let g:tagbar_ctags_bin="~/.local/bin/homebrew/bin/ctags"
+endif
+nmap <A-o> :TagbarToggle<CR>
+
+" undotree
+" Alt-z keymap to show undotree
+nnoremap <A-z> :UndotreeToggle<CR>
+if has("persistent_undo") " Persistent undo in undotree
+  let target_path = expand('$HOME/.vim/undodir')
+  if !isdirectory(target_path) " create the directory and any parent directories if the location does not exist.
+    call mkdir(target_path, "p", 0700)
+  endif
+  let &undodir=target_path
+  set undofile
+endif
+
+" vim-move
+let g:move_map_keys=0
+let g:move_auto_indent=1
+let g:move_past_end_of_line=1
+vmap <A-Down> <Plug>MoveBlockDown
+vmap <A-Up> <Plug>MoveBlockUp
+vmap <A-Left> <Plug>MoveBlockLeft
+vmap <A-Right> <Plug>MoveBlockRight
+nmap <A-Down> <Plug>MoveLineDown
+nmap <A-Up> <Plug>MoveLineUp
+
+" nerdcommenter
+" Need to turn on the filetype plugin, note that `filetype plugin indent on` also does this
+filetype plugin on
+let g:NERDCreateDefaultMappings = 1
+let g:NERDSpaceDelims = 1 " Add spaces after comment delimiters by default
+let g:NERDCompactSexyComs = 1 " Use compact syntax for prettified multi-line comments
+let g:NERDDefaultAlign = 'left' " Align line-wise comment delimiters flush left instead of following code indentation
+let g:NERDCommentEmptyLines = 1 " Allow commenting and inverting empty lines (useful when commenting a region)
+let g:NERDToggleCheckAllLines = 1 " Enable NERDCommenterToggle to check all selected lines is commented or not 
+nmap <C-_> <Plug>NERDCommenterToggle
+vmap <C-_> <Plug>NERDCommenterToggle<CR>gv
+
+" vim-visual-multi
+let g:VM_default_mappings = 0
+let g:VM_maps = {}
+let g:VM_maps['Find Under']                  = '<C-d>'
+let g:VM_maps['Find Subword Under']          = '<C-d>'
+let g:VM_maps["Select All"]                  = '<C-L>'
+let g:VM_maps["Start Regex Search"]          = '\\/'
+let g:VM_maps["Add Cursor Down"]             = '<C-A-Down>'
+let g:VM_maps["Add Cursor Up"]               = '<C-A-Up>'
+let g:VM_maps["Add Cursor At Pos"]           = '\\\'
+
+let g:VM_maps["Visual Regex"]                = '\\/'
+let g:VM_maps["Visual All"]                  = '\\A' 
+let g:VM_maps["Visual Add"]                  = '\\a'
+let g:VM_maps["Visual Find"]                 = '\\f'
+let g:VM_maps["Visual Cursors"]              = '\\c'
+
+let g:VM_mouse_mappings = 1
+
+" Markdownpreview
+let g:mkdp_auto_start = 0 " set to 1, nvim will open the preview window after entering the markdown buffer
+let g:mkdp_auto_close = 1 " set to 1, the nvim will auto close current preview window when change from markdown buffer to another buffer
+let g:mkdp_refresh_slow = 0 " set to 1, the vim will refresh markdown when save the buffer or leave from insert mode, default 0 is auto refresh markdown as you edit or move the cursor
+let g:mkdp_open_ip = '' " use custom IP to open preview page, useful when you work in remote vim and preview on local browser, more detail see: https://github.com/iamcco/markdown-preview.nvim/pull/9
+let g:mkdp_port = '' " use a custom port to start server or random for empty
+let g:mkdp_filetypes = ['markdown'] " recognized filetypes, these filetypes will have MarkdownPreview... commands
+" options for markdown render
+let g:mkdp_preview_options = {
+    \ 'mkit': {},
+    \ 'katex': {},
+    \ 'uml': {},
+    \ 'maid': {},
+    \ 'disable_sync_scroll': 0,
+    \ 'sync_scroll_type': 'middle',
+    \ 'hide_yaml_meta': 1,
+    \ 'sequence_diagrams': {},
+    \ 'flowchart_diagrams': {},
+    \ 'content_editable': v:false,
+    \ 'disable_filename': 0
+    \ }
+
+" coc language plugins
+" coc-ltex uses ltex-ls (and LanguageTools) to check grammar mistakes. Seems it doesn't work properly on Windows and requires fixing the path to a tool called "clipboardy", use :CocOpenLog to see if this is indeed the case. This plugin is interchangable with Grammarous.
+let g:coc_global_extensions = ['coc-pydocstring', 'coc-highlight', 'coc-powershell', 'coc-json', 'coc-git', 'coc-pyright', 'coc-tsserver', 'coc-ltex', 'coc-sh', 'coc-markdownlint', 'coc-spell-checker']
+" coc-highlight highlights colors and the current word
+" coc-spell-checker is a spellchecker, used by invoking codeAction and then down
+
+" Some servers have issues with backup files, see #649.
+set nobackup
+set nowritebackup
+
+" Having longer updatetime (default is 4000 ms = 4 s) leads to noticeable
+" delays and poor user experience.
+set updatetime=300
+
+" Always show the signcolumn, otherwise it would shift the text each time
+" diagnostics appear/become resolved.
+set signcolumn=yes
+
+" Use tab for trigger completion with characters ahead and navigate.
+" NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
+" other plugin before putting this into your config.
+inoremap <silent><expr> <TAB>
+      \ coc#pum#visible() ? coc#pum#next(1):
+      \ CheckBackspace() ? "\<Tab>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
+
+" Make <CR> to accept selected completion item or notify coc.nvim to format
+" <C-g>u breaks current undo, please make your own choice.
+inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm()
+                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+
+function! CheckBackspace() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+" Use <c-space> to trigger completion.
+if has('nvim')
+  inoremap <silent><expr> <c-space> coc#refresh()
+else
+  inoremap <silent><expr> <c-@> coc#refresh()
+endif
+
+" Use `[g` and `]g` to navigate diagnostics
+" Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
+nmap <silent> [g <Plug>(coc-diagnostic-prev)
+nmap <silent> ]g <Plug>(coc-diagnostic-next)
+
+" GoTo code navigation.
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+
+" Use K to show documentation in preview window.
+nnoremap <silent> K :call ShowDocumentation()<CR>
+
+function! ShowDocumentation()
+  if CocAction('hasProvider', 'hover')
+    call CocActionAsync('doHover')
+  else
+    call feedkeys('K', 'in')
+  endif
+endfunction
+
+" Highlight the symbol and its references when holding the cursor.
+autocmd CursorHold * silent call CocActionAsync('highlight')
+
+" Symbol renaming.
+nmap <leader>rn <Plug>(coc-rename)
+
+" Formatting selected code.
+xmap <leader>f  <Plug>(coc-format-selected)
+nmap <leader>f  <Plug>(coc-format-selected)
+
+augroup mygroup
+  autocmd!
+  " Setup formatexpr specified filetype(s).
+  autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
+  " Update signature help on jump placeholder.
+  autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
+augroup end
+
+" Applying codeAction to the selected region.
+" Example: `<leader>aap` for current paragraph
+xmap <leader>a  <Plug>(coc-codeaction-selected)
+nmap <leader>a  <Plug>(coc-codeaction-selected)
+
+" Remap keys for applying codeAction to the current buffer.
+nmap <leader>ac  <Plug>(coc-codeaction)
+" Apply AutoFix to problem on the current line.
+nmap <leader>qf  <Plug>(coc-fix-current)
+
+" Run the Code Lens action on the current line.
+nmap <leader>cl  <Plug>(coc-codelens-action)
+
+" Map function and class text objects
+" NOTE: Requires 'textDocument.documentSymbol' support from the language server.
+xmap if <Plug>(coc-funcobj-i)
+omap if <Plug>(coc-funcobj-i)
+xmap af <Plug>(coc-funcobj-a)
+omap af <Plug>(coc-funcobj-a)
+xmap ic <Plug>(coc-classobj-i)
+omap ic <Plug>(coc-classobj-i)
+xmap ac <Plug>(coc-classobj-a)
+omap ac <Plug>(coc-classobj-a)
+
+" Remap <C-f> and <C-b> for scroll float windows/popups.
+if has('nvim-0.4.0') || has('patch-8.2.0750')
+  nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+  nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+  inoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<Right>"
+  inoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<Left>"
+  vnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+  vnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+endif
+
+" Use CTRL-S for selections ranges.
+" Requires 'textDocument/selectionRange' support of language server.
+nmap <silent> <C-s> <Plug>(coc-range-select)
+xmap <silent> <C-s> <Plug>(coc-range-select)
+
+" Add `:Format` command to format current buffer.
+command! -nargs=0 Format :call CocActionAsync('format')
+
+" Add `:Fold` command to fold current buffer.
+command! -nargs=? Fold :call     CocAction('fold', <f-args>)
+
+" Add `:OR` command for organize imports of the current buffer.
+command! -nargs=0 OR   :call     CocActionAsync('runCommand', 'editor.action.organizeImport')
+
+" Add (Neo)Vim's native statusline support.
+" NOTE: Please see `:h coc-status` for integrations with external plugins that
+" provide custom statusline: lightline.vim, vim-airline.
+set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
+
+" Mappings for CoCList
+" Show all diagnostics.
+nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
+" Manage extensions.
+nnoremap <silent><nowait> <space>e  :<C-u>CocList extensions<cr>
+" Show commands.
+nnoremap <silent><nowait> <space>c  :<C-u>CocList commands<cr>
+" Find symbol of current document.
+nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
+" Search workspace symbols.
+nnoremap <silent><nowait> <space>s  :<C-u>CocList -I symbols<cr>
+" Do default action for next item.
+nnoremap <silent><nowait> <space>j  :<C-u>CocNext<CR>
+" Do default action for previous item.
+nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
+" Resume latest coc list.
+nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
+
+" VimTeX
+syntax enable " This enables Vim's and neovim's syntax-related features. Without this, some VimTeX features will not work (see ':help vimtex-requirements' for more info).
+let g:vimtex_view_general_viewer = 'SumatraPDF'
+let g:vimtex_view_general_options
+            \ = '-reuse-instance -forward-search @tex @line @pdf'
+            \ . ' -inverse-search "vim --servername ' . v:servername
+            \ . ' --remote-send \"^<C-\^>^<C-n^>'
+            \ . ':drop \%f^<CR^>:\%l^<CR^>:normal\! zzzv^<CR^>'
+            \ . ':execute ''drop '' . fnameescape(''\%f'')^<CR^>'
+            \ . ':\%l^<CR^>:normal\! zzzv^<CR^>'
+            \ . ':call remote_foreground('''.v:servername.''')^<CR^>^<CR^>\""'
+" Fix inverse search on nvim+windows+sumatra: https://jdhao.github.io/2021/02/20/inverse_search_setup_neovim_vimtex/
+" If you prefer Firefox
+" let g:vimtex_view_method = 'general'
+" let g:vimtex_view_general_viewer = 'firefox'
+" let g:vimtex_view_general_options = "file:///@pdf"
+" let g:vimtex_view_general_options_latexmk = '--unique'
+
+" vimspector
+let g:vimspector_enable_mappings = 'VISUAL_STUDIO'
+" mnemonic 'di' = 'debug inspect' (pick your own, if you prefer!)
+" for normal mode - the word under the cursor
+nmap <Leader>di <Plug>VimspectorBalloonEval
+" for visual mode, the visually selected text
+xmap <Leader>di <Plug>VimspectorBalloonEval
+
+" vim-test
+" these "Ctrl mappings" work well when Caps Lock is mapped to Ctrl
+" nmap <silent> t<C-n> :TestNearest<CR>
+" nmap <silent> t<C-f> :TestFile<CR>
+" nmap <silent> t<C-s> :TestSuite<CR>
+" nmap <silent> t<C-l> :TestLast<CR>
+" nmap <silent> t<C-g> :TestVisit<CR>
+
+" Vim integration for mrusme/reader
+function s:vertopen_url()
+  normal! "uyiW
+  let mycommand = "reader " . @u
+  execute "vertical terminal " . mycommand
+endfunction
+noremap <Plug>vertopen_url : call <SID>vertopen_url()<CR>
+nmap gx <Plug>vertopen_url
+
+" vim-buffet
+let g:buffet_always_show_tabline = 0
+let g:buffet_powerline_separators = 1
+let g:buffet_show_index = 1
+let g:buffet_tab_icon = "\uf00a"
+let g:buffet_left_trunc_icon = "\uf0a8"
+let g:buffet_right_trunc_icon = "\uf0a9"
+
+nmap <leader>1 <Plug>BuffetSwitch(1)
+nmap <leader>2 <Plug>BuffetSwitch(2)
+nmap <leader>3 <Plug>BuffetSwitch(3)
+nmap <leader>4 <Plug>BuffetSwitch(4)
+nmap <leader>5 <Plug>BuffetSwitch(5)
+nmap <leader>6 <Plug>BuffetSwitch(6)
+nmap <leader>7 <Plug>BuffetSwitch(7)
+nmap <leader>8 <Plug>BuffetSwitch(8)
+nmap <leader>9 <Plug>BuffetSwitch(9)
+nmap <leader>0 <Plug>BuffetSwitch(10)
+
+" Go to next tab
+noremap <Tab> :bn<CR>
+" Go to previous tab
+noremap <S-Tab> :bp<CR>
+
+" Close tab
+noremap <Leader><Tab> :Bw<CR>
+noremap <Leader><S-Tab> :Bw!<CR>
+noremap <C-F4> :Bw<CR>
+noremap <C-S-F4> :Bw!<CR>
+
+" New tab
+noremap <C-t> :enew<CR>
+
+let g:grammarous#languagetool_cmd = 'languagetool-commandline'
+
+-- ## Configure VIM to run `chezmoi apply` whenever you save a dotfile
+autocmd BufWritePost ~/.local/share/chezmoi/* ! chezmoi apply --source-path "%"
