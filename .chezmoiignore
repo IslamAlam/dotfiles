@@ -1,0 +1,21 @@
+README.md
+{{- if ne .chezmoi.hostname "work-laptop" }}
+.work # only manage .work on work-laptop
+{{- end }}
+
+
+{{ if ne .chezmoi.os "darwin" }}
+Library/Application Support/App/file.conf
+{{ end }}
+{{ if ne .chezmoi.os "linux" }}
+.config/app/file.conf
+{{ end }}
+
+# This will make `~/.bashrc` a symlink to `.bashrc_darwin` on `darwin` and to `.bashrc_linux` on `linux`. 
+# The `.chezmoiignore` configuration ensures that only the OS-specific `.bashrc_os` file will be installed on each OS.
+{{ if ne .chezmoi.os "darwin" }}
+.bashrc_darwin
+{{ end }}
+{{ if ne .chezmoi.os "linux" }}
+.bashrc_linux
+{{ end }}
