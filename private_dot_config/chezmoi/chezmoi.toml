@@ -1,3 +1,6 @@
+[data]
+    email = "me@imansour.net"
+
 [git]
     autoCommit = true
     autoPush = true
