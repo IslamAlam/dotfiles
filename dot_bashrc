@@ -123,3 +123,16 @@ if ! shopt -oq posix; then
 fi
 . "$HOME/.cargo/env"
 . /opt/conda/etc/profile.d/conda.sh && conda activate base
+
+
+# To load starship from zinit install
+ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
+# I put local programs in .local/bin
+starship_bin="$(dirname "$ZINIT_HOME")"/plugins/starship---starship
+if [[ -f ${starship_bin}/starship ]]; then
+    [[ ":$PATH:" != *":${starship_bin}:"* ]] && export PATH="${starship_bin}:${PATH}"
+fi
+# To init startship
+if command -v starship &> /dev/null; then
+  eval "$(starship init bash)"
+fi

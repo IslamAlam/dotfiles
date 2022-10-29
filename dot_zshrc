@@ -69,10 +69,6 @@ fi
 # antigen theme romkatv/powerlevel10k     # Load the theme.
 # antigen apply   # Tell Antigen that you're done.
 
-
-
-
-
 if [ -f "/data/largeHome/mans_is/.mambaforge/etc/profile.d/mamba.sh" ]; then
     . "/data/largeHome/mans_is/.mambaforge/etc/profile.d/mamba.sh"
 fi
