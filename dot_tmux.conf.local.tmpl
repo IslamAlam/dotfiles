@@ -475,7 +475,16 @@ set -g @tasks_format_end '#[fg=white,bg=#44475a]'
 set -g @tasks_icon_urgent '🔥'
 set -g @tasks_icon_outstanding '+'
 
+# 
+# {{  ( "hr-slx016" | replaceAllRegex "-slx.*" "" ) }}
+{{ if eq "hr" ( .chezmoi.hostname | replaceAllRegex "-slx.*" "" ) }}
+# hostname on hr
 set-option -g default-shell ~/.local/bin/zsh
+{{ else if eq .chezmoi.gid "1000" -}}
+set-option -g default-shell /usr/bin/zsh
+{{ else }}
+# set-option -g default-shell /usr/bin/zsh
+{{end}}
 
 # -- custom variables ----------------------------------------------------------
 
