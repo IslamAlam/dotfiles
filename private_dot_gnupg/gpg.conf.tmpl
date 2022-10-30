@@ -62,3 +62,11 @@ throw-keyids
 default-key 712B106A06F5ACEC
 auto-key-retrieve
 # pinentry-mode loopback
+
+{{ if eq .chezmoi.os "darwin" }}
+# darwin
+{{ else if eq .chezmoi.os "linux" }}
+# linux
+{{ else }}
+# other operating system
+{{ end }}
