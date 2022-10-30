@@ -15,4 +15,4 @@
 
 encryption = "gpg"
 [gpg]
-    recipient = "..."
+    symmetric = true

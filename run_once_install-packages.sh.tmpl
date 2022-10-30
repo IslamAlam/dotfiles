@@ -1,7 +1,63 @@
 #!/bin/bash
 {{ if eq .chezmoi.os "linux" -}}
 #!/bin/sh
-sudo apt install ripgrep
+
+
+{{ if eq .chezmoi.gid "1000" -}}
+#### Install on machine with sudo
+sudo apt update && sudo apt upgrade -y
+sudo apt install --yes \
+    zsh \
+    tmux \
+    openssh-server \
+    gnupg2 \
+    systemd \
+    systemd-sysv \
+    wget \
+    gnupg \
+    ca-certificates \
+    autossh \
+    sslh \
+    ripgrep
+
+sudo bash -c 'cat > /etc/systemd/system/autossh-tunnel.service <<EOF
+[Unit]
+Description=AutoSSH reverse tunnel service for jump.you.io 100022 -> 22
+#Wants=network-online.target
+#After=network-online.target
+After=network.target
+StartLimitIntervalSec=5
+
+[Service]
+User=mans_is
+ExecStart=/usr/bin/autossh -M 0 -N -o "ServerAliveInterval 15" -o "ServerAliveCountMax 3" -o "ConnectTimeout 10" -o "ExitOnForwardFailure yes" -i /home/mans_is/.ssh/id_ed25519 -p 22 sshtunuser@138.246.233.193 -R 10222:localhost:22 -R 2443:localhost:443
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target
+EOF'
+
+sudo systemctl daemon-reload
+sudo systemctl enable autossh-tunnel.service 
+sudo systemctl start autossh-tunnel.service 
+sudo systemctl status autossh-tunnel.service 
+
+
+########## Install conda with mamba
+CONDA_DIR="/opt/conda"
+PATH=${CONDA_DIR}/bin:${PATH}
+sudo groupadd -r conda
+sudo usermod -a -G conda "${USER}"
+sudo chown -R "${USER}:conda" "${CONDA_DIR}"
+sudo mkdir -p ${CONDA_DIR}
+
+cd /tmp
+wget "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"
+bash Mambaforge-$(uname)-$(uname -m).sh -b --force -p $CONDA_DIR
+
+{{ end -}}
+
 {{ else if eq .chezmoi.os "darwin" -}}
 #!/bin/sh
 brew install ripgrep
