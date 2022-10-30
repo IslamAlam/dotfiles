@@ -255,7 +255,14 @@ tmux_conf_theme_status_left=" #{os_icon} ❐ #S | ↑#{?uptime_y, #{uptime_y}y,}
 # tmux_conf_theme_status_right='#{pairing}#{synchronized}#{?battery_status,#{battery_status},}#{?battery_percentage,#{battery_percentage},}, 📅 %R, ⌚%d%b | 💻#{username}#{root}@#{hostname}'
 # tmux_conf_theme_status_right='#{prefix}#{mouse}#{pairing}#{synchronized}#{?battery_status,#{battery_status},}#{?battery_vbar, #{battery_vbar},}#{?battery_percentage, #{battery_percentage},} #(curl -m 1 wttr.in?format="%l:+%c+%t+%m+%M\n" 2>/dev/null; sleep 900) , 🕘 %R, 📅 %d%b | 💻#{username}#{root}@#{hostname}'
 # tmux_conf_theme_status_right='#{prefix}#{pairing}#{synchronized} #(curl -s 1 'wttr.in?format=%l:+%c+%t+%M+%m' 2>/dev/null; sleep 900) , %R , %d %b | #{username}#{root} | #{hostname} '
+{{ if eq "hr" ( .chezmoi.hostname | replaceAllRegex "-slx.*" "" ) }}
+# hostname on hr
+tmux_conf_theme_status_right='#{prefix}#{pairing}#{synchronized} #{weather_dlr} #{online} #{network_bandwidth} , %R , %d %b | #{username}#{root} | #{hostname} '
+{{ else if eq .chezmoi.gid "1000" -}}
+tmux_conf_theme_status_right='#{prefix}#{pairing}#{synchronized} #{weather_dlr} #{online} #{network_bandwidth} , %R , %d %b | #{username}#{root} | #{hostname} '
+{{ else }}
 tmux_conf_theme_status_right='#{prefix}#{pairing}#{synchronized} #{weather_moon} #{online} #{network_bandwidth} , %R , %d %b | #{username}#{root} | #{hostname} '
+{{end}}
 # tmux_conf_theme_status_right="#{weather}"
 # tmux_conf_theme_status_right=" #{prefix}#{mouse}#{pairing}#{synchronized}#{?battery_status,#{battery_status},}#{?battery_bar, #{battery_bar},}#{?battery_percentage, #{battery_percentage},} #[inherit] #{weather}, %R , %d %b | #{username_ssh}#{root} | #{hostname_ssh} "
 
@@ -517,7 +524,7 @@ set-option -g default-shell /usr/bin/zsh
 # }
 #
 # weather_dlr() { 
-#   curl -f -s -m 2 'wttr.in/?format=%l:+%c+%t+%m+%M\n' || printf '\n' # /!\ make sure curl is installed
+#   curl -f -s -m 2 'wttr.in/Munich?format=%l:+%c+%t+%m+%M\n' || printf '\n' # /!\ make sure curl is installed
 #   sleep 900                                         # sleep for 15 minutes, throttle network requests whatever the value of status-interval
 # }
 #
