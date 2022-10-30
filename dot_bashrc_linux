@@ -138,3 +138,7 @@ fi
 if command -v starship &> /dev/null; then
   eval "$(starship init bash)"
 fi
+
+export GPG_TTY=$(tty)
+export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+gpgconf --launch gpg-agent
