@@ -5,6 +5,7 @@
 
 {{ if eq .chezmoi.gid "1000" -}}
 #### Install on machine with sudo
+echo "##### Install packages with sudo"
 sudo apt update && sudo apt upgrade -y
 sudo apt install --yes \
     zsh \
@@ -51,6 +52,7 @@ sudo systemctl start autossh-tunnel.service
 
 
 ########## Install conda with mamba
+echo "##### Install conda "
 CONDA_DIR="/opt/conda"
 PATH=${CONDA_DIR}/bin:${PATH}
 sudo groupadd -r conda
