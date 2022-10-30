@@ -1,45 +1,80 @@
 format = """
-[](#9A348E)\
 $username\
-[](bg:#DA627D fg:#9A348E)\
+$kubernetes\
 $directory\
-[](fg:#DA627D bg:#FCA17D)\
+${custom.git_host}\
 $git_branch\
+$git_commit\
+$git_state\
 $git_status\
-[](fg:#FCA17D bg:#86BBD8)\
+$hg_branch\
+$docker_context\
+$package\
 $c\
+$cmake\
+$dart\
+$deno\
+$dotnet\
 $elixir\
 $elm\
+$erlang\
 $golang\
 $haskell\
+$helm\
 $java\
 $julia\
-$nodejs\
+$kotlin\
 $nim\
+$nodejs\
+$ocaml\
+$perl\
+$php\
+$purescript\
+$python\
+$red\
+$ruby\
 $rust\
 $scala\
-[](fg:#86BBD8 bg:#06969A)\
-$docker_context\
-[](fg:#06969A bg:#33658A)\
-$time\
-[ ](fg:#33658A)\
-"""
+$swift\
+$terraform\
+$vlang\
+$vagrant\
+$zig\
+$nix_shell\
+$conda\
+$aws\
+$gcloud\
+$openstack\
+$env_var\
+$crystal\
+$custom\
+$cmd_duration\
+$lua\
+$line_break\
+$jobs\
+$character"""
 
+scan_timeout = 10
 # Disable the blank line at the start of the prompt
-# add_newline = false
+add_newline = false
 
-# You can also replace your username with a neat symbol like  to save some space
-[username]
-show_always = true
-style_user = "bg:#9A348E"
-style_root = "bg:#9A348E"
-format = '[$user ]($style)'
+[battery]
+disabled = true
+
+[character]
+success_symbol = "[](blue)"
+error_symbol = "[](bright-red)"
+
+[cmd_duration]
+show_notifications = true
+min_time_to_notify = 60_000
 
 [directory]
-style = "bg:#DA627D"
-format = "[ $path ]($style)"
+format = "[](blue) [$path]($style)[$read_only]($read_only_style)"
+read_only = " "
 truncation_length = 3
 truncation_symbol = "…/"
+fish_style_pwd_dir_length = 0
 
 # Here is how you can shorten some long paths by text replacement
 # similar to mapped_locations in Oh My Posh:
@@ -53,6 +88,8 @@ truncation_symbol = "…/"
 # will not be replaced, because "Documents" was already substituted before.
 # So either put "Important Documents" before "Documents" or use the substituted version:
 # "Important  " = "  "
+
+
 
 [c]
 symbol = " "
@@ -69,19 +106,24 @@ symbol = " "
 style = "bg:#86BBD8"
 format = '[ $symbol ($version) ]($style)'
 
-[elm]
-symbol = " "
-style = "bg:#86BBD8"
-format = '[ $symbol ($version) ]($style)'
-
+[git_state]
+format = '\(:[$state( $progress_current/$progress_total)]($style)\)'
 [git_branch]
-symbol = ""
-style = "bg:#FCA17D"
-format = '[ $symbol $branch ]($style)'
+format = ":[$symbol$branch]($style)"
+symbol = " "
 
 [git_status]
-style = "bg:#FCA17D"
-format = '[$all_status$ahead_behind ]($style)'
+format = '(:[$all_status$ahead_behind]($style)) '
+conflicted = '\[ [$count](bright-white bold)\]'
+ahead = '\[[﯁ ](bright-blue)[$count](bright-white bold)\]'
+behind = '\[[﮾ ](white)[$count](bright-white bold)\]'
+diverged = '\[[ ](purple)|[ ﯁ ](bright-blue)[$ahead_count](bright-white bold)[ ﮾ ](white)[$behind_count](bright-white)\]'
+untracked = '\[ [$count](bright-white bold)\]'
+stashed = '\[[](yellow) [$count](bright-white bold)\]'
+modified = '\[[ ](bright-yellow)[$count](bright-white bold)\]'
+staged = '\[[ ](bright-green)[$count](bright-white bold)\]'
+renamed = '\[[ ](bright-cyan) [$count](bright-white bold)\]'
+deleted = '\[ [$count](bright-white bold)\]'
 
 [golang]
 symbol = " "
@@ -128,3 +170,44 @@ disabled = false
 time_format = "%R" # Hour:Minute Format
 style = "bg:#33658A"
 format = '[ ♥ $time ]($style)'
+
+[python]
+format = 'via [${symbol}${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
+
+[custom.git_host]
+command = """
+URL=$(command git ls-remote --get-url 2> /dev/null)
+if [[ "$URL" =~ "github" ]]; then
+    ICON=" "
+elif [[ "$URL" =~ "gitlab" ]]; then
+    ICON=" "
+elif [[ "$URL" =~ "bitbucket" ]];then
+    ICON=" "
+elif [[ "$URL" =~ "kernel" ]];then
+    ICON=" "
+elif [[ "$URL" =~ "archlinux" ]];then
+    ICON=" "
+elif [[ "$URL" =~ "gnu" ]];then
+    ICON=" "
+elif [[ "$URL" =~ "git" ]];then
+    ICON=" "
+else
+    ICON=" "
+    URL="localhost"
+fi
+for PATTERN in "https" "http" "git" "://" "@"; do
+    [[ "$URL" == "$PATTERN"* ]] && URL="${URL##$PATTERN}"
+done
+for PATTERN in "/" ".git"; do
+    [[ "$URL" == *"$PATTERN" ]] && URL="${URL%%$PATTERN}"
+done
+printf "%s%s" "$ICON" "$URL"
+"""
+directories = [".git"]
+when = 'git rev-parse --is-inside-work-tree 2> /dev/null'
+shell = ["bash","--norc","--noprofile"]
+style = "bright-yellow bold"
+format = " at [$output]($style)"
+
+[hostname]
+disabled = true
