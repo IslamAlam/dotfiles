@@ -1,7 +1,7 @@
 [data]
     email = "me@imansour.net"
 [diff]
-    command = "meld"
+    command = "code"
     args = ["--diff", "{{ .Destination }}", "{{ .Target }}"]
 [edit]
     command = "code"
@@ -15,4 +15,5 @@
 
 encryption = "gpg"
 [gpg]
-    symmetric = true
+    recipient = "712B106A06F5ACEC"
+    symmetric = false
