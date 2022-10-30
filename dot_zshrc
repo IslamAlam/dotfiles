@@ -3,6 +3,8 @@ timezsh() {
   for i in $(seq 1 10); do /usr/bin/time $shell -i -c exit; done
 }
 
+
+
 # Powerlevel10k
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
@@ -140,6 +142,15 @@ zinit light starship/starship
 #     # pick"async.zsh" \
 #     # src"pure.zsh" \
 
+# Zinit Setting
+# Must Load OMZ Git library
+zi snippet OMZL::git.zsh
+zi snippet OMZL::history.zsh
+
+
+# Load Git plugin from OMZ
+zi snippet OMZP::git
+zi snippet OMZP::history
 # Binary release in archive, from GitHub-releases page.
 # After automatic unpacking it provides program "fzf".
 zi ice from"gh-r" as"program"
@@ -216,6 +227,13 @@ zinit ice as"program" from"gh-r" \
   pick"zoxide*/zoxide" \
   atload'eval "$(zoxide init zsh)"'
 zinit light ajeetdsouza/zoxide
+
+# zi cdclear -q # <- forget completions provided up to this moment
+
+# HISTFILE=~/.zsh_history
+# HISTSIZE=10000
+# SAVEHIST=1000
+# setopt appendhistory
 
 # _evalcache zoxide init zsh # eval "$(zoxide init zsh)"
 alias ..="z .."
