@@ -1,0 +1,27 @@
+# For [zsh](https://github.com/rbenv/rbenv/wiki/Unix-shell-initialization#zsh), the order is like this:
+
+# 1.  `/etc/zshenv` (no longer exists on macOS by default)
+# 2.  `~/.zshenv`
+# 3.  **login** mode:
+#     1.  `/etc/zprofile` (calling `path_helper`)
+#     2.  `~/.zprofile`
+# 4.  **interactive**: `/etc/zshrc` `~/.zshrc`
+# 5.  **login** mode: `/etc/zlogin` `~/.zlogin`
+
+# remove duplicat entries from $PATH
+# zsh uses $path array along with $PATH 
+typeset -U PATH path
+
+export GOPATH=~/.go
+
+path=(
+  ~/.bin
+  ~/bin
+  ~/.local/bin
+  ~/.deno/bin
+  $GOPATH/bin
+  $path
+  /usr/local/zig
+)
+
+. "$HOME/.cargo/env"

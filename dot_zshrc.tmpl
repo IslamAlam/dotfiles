@@ -263,3 +263,10 @@ if [[ ! -n $TMUX && $- == *l* ]]; then
 fi
 
 enable-fzf-tab
+
+{{ if eq .chezmoi.os "darwin" }}
+{{   include ".zshrc_darwin" }}
+{{ end }}
+{{ if eq .chezmoi.os "linux" }}
+{{   include ".zshrc_linux" }}
+{{ end }}

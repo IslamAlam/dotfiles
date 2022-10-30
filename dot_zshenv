@@ -1,22 +1,15 @@
+# ########################
+# Environment variables  #
+# ########################
+#
 export LC_ALL="en_US.utf8"
 export LANG="en_US.utf8"
 export LANGUAGE="en_US.utf8"
+
+export XDG_CONFIG_HOME=$HOME/.config
+export KERNEL_NAME=$( uname | tr '[:upper:]' '[:lower:]' )
 
 export EDITOR=${commands[nvim]:-"vim"}
 # export PMY_TRIGGER_KEY="^y"
 export ENHANCD_COMMAND=ecd
 export KEYTIMEOUT=1
-
-export GOPATH=~/.go
-
-path=(
-  ~/.bin
-  ~/bin
-  ~/.local/bin
-  ~/.deno/bin
-  $GOPATH/bin
-  $path
-  /usr/local/zig
-)
-
-. "$HOME/.cargo/env"
