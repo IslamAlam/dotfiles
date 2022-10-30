@@ -20,6 +20,9 @@ sudo apt install --yes \
     sslh \
     ripgrep
 
+# 
+sudo apt autoremove --yes
+
 sudo bash -c 'cat > /etc/systemd/system/autossh-tunnel.service <<EOF
 [Unit]
 Description=AutoSSH reverse tunnel service for jump.you.io 100022 -> 22
