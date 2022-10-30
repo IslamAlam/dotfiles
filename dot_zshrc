@@ -134,11 +134,11 @@ zinit light starship/starship
 # A glance at the new for-syntax – load all of the above
 # plugins with a single command. For more information see:
 # https://zdharma-continuum.github.io/zinit/wiki/For-Syntax/
-zinit for \
-    light-mode \
-  sindresorhus/pure
-    # pick"async.zsh" \
-    # src"pure.zsh" \
+# zinit for \
+#     light-mode \
+#   sindresorhus/pure
+#     # pick"async.zsh" \
+#     # src"pure.zsh" \
 
 # Binary release in archive, from GitHub-releases page.
 # After automatic unpacking it provides program "fzf".
@@ -192,9 +192,9 @@ zinit snippet OMZP::nvm
 
 
 # shell extention
-zinit ice wait lucid atload'_zsh_autosuggest_start'; zinit light zsh-users/zsh-autosuggestions
-zinit ice wait'0' blockf atpull'zinit creinstall -q .'; zinit light zsh-users/zsh-completions
-zinit ice wait'0'; zinit light zdharma-continuum/fast-syntax-highlighting
+# zinit ice wait lucid atload'_zsh_autosuggest_start'; zinit light zsh-users/zsh-autosuggestions
+# zinit ice wait'0' blockf atpull'zinit creinstall -q .'; zinit light zsh-users/zsh-completions
+# zinit ice wait'0'; zinit light zdharma-continuum/fast-syntax-highlighting
 zinit light ryutok/rust-zsh-completions
 zinit ice pick'cli.zsh'; zinit light sudosubin/zsh-github-cli
 zinit light Aloxaf/fzf-tab
