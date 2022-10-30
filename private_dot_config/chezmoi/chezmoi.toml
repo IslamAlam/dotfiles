@@ -1,5 +1,5 @@
 [data]
-    email = "me@imansour.net"
+    email = "is3mansour@gmail.com"
 [diff]
     command = "code"
     args = ["--diff", "{{ .Destination }}", "{{ .Target }}"]
