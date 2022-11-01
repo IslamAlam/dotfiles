@@ -1,7 +1,10 @@
 
 #!/bin/bash
-{{ if eq .chezmoi.os "linux" -}}
+
+{{ if eq .chezmoi.os "linux" }}
+
+# ⚡️ Zap
+# The delightful package manager for AppImages
+
 curl https://raw.githubusercontent.com/srevinsaju/zap/main/install.sh | bash -s
-
-
-{{ end -}}
+{{ end }}
