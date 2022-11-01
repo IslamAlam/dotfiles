@@ -1,0 +1,114 @@
+# Read more about SSH config files: https://linux.die.net/man/5/ssh_config
+### default for all ##
+
+#Host *
+	#ForwardAgent no
+	#ForwardX11 no
+	#ForwardX11Trusted yes
+	#User nixcraft
+	#Port 22
+	#Protocol 2
+	#ServerAliveInterval 60
+	#ServerAliveCountMax 30
+
+# Host *
+    IgnoreUnknown AddKeysToAgent,UseKeychain
+    AddKeysToAgent yes
+    UseKeychain yes
+	CheckHostIP no
+	StrictHostKeyChecking no
+	ConnectTimeout 50
+	ForwardAgent yes
+	ControlMaster auto
+	ControlPath /tmp/.ssh_control-%h-%p-%r
+	ControlPersist 4h
+	StreamLocalBindUnlink yes
+	Compression yes
+    ForwardAgent yes
+    ForwardX11 yes
+    ForwardX11Trusted yes
+#Host *
+    #IdentityAgent ${SSH_AUTH_SOCK}
+
+Include config.d/* 
+
+# https://gist.github.com/jexchan/2351996	
+#activehacker account
+Host github.com-activehacker
+	HostName github.com
+	User git
+	IdentityFile ~/.ssh/id_rsa_activehacker
+
+#jexchan account
+Host github.com-jexchan
+	HostName github.com
+	User git
+	IdentityFile ~/.ssh/id_rsa_jexchan
+
+# https://gist.github.com/rbialek/1012262	
+Host test.github.com
+	User git
+	Hostname github.com
+	PreferredAuthentications publickey
+	IdentitiesOnly yes
+	IdentityFile ~/.ssh/id_github
+
+Host github.com
+	User git
+	Hostname github.com
+    ForwardX11 no
+    ForwardX11Trusted no
+
+Host git.balena-cloud.com
+	Hostname git.balena-cloud.com
+	User g_islam_a_mansour
+	PreferredAuthentications publickey
+	IdentitiesOnly yes
+	IdentityFile ~/.ssh/id_balena
+
+# gpg --full-generate-key
+# From the list of GPG keys, copy the GPG key ID you'd like to use. In this example, the GPG key ID is 3AA5C34371567BD2:
+# 
+# $ gpg --list-secret-keys --keyid-format LONG
+# /Users/hubot/.gnupg/secring.gpg
+# ------------------------------------
+# sec   4096R/3AA5C34371567BD2 2016-03-10 [expires: 2017-03-10]
+# uid                          Hubot 
+# ssb   4096R/42B317FD4BA89E7A 2016-03-10
+
+# git config --global user.signingkey 3AA5C34371567BD2
+# gpg --output revoke.asc --gen-revoke is3mansour@gmail.com
+# export publickey
+# gpg --armor --output public-key.gpg --export is3mansour@gmail.com
+
+# After extending the expiry date of a GPG key you might have to copy your key to another machine to use the same key there. Here is how:
+# 
+# Identify your private key by running gpg --list-secret-keys. You need the ID of your private key (second column)
+# Run this command to export your key: gpg --export-secret-keys $ID > my-private-key.asc
+# Copy the key to the other machine (scp is your friend)
+# To import the key, run gpg --import my-private-key.asc
+
+Host pi-home
+    Hostname raspberrypi
+    User pi
+    PreferredAuthentications publickey
+    IdentitiesOnly yes
+    IdentityFile ~/.ssh/id_pi_home
+# password raspberry
+# ssh-copy-id pi@10.168.2.101
+#  cat ~/.ssh/id_pi.pub | ssh pi@10.168.2.101 "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
+
+host machineB
+    Hostname 10.1.0.103
+    User pi
+    PreferredAuthentications publickey
+    IdentitiesOnly yes
+    IdentityFile ~/.ssh/id_pi_home
+	LocalForward 1235 192.168.1.1:443
+
+host machineC
+    ProxyCommand ssh machineB nc %h %p
+    Hostname localhost
+    User root
+    LocalForward 1235 machineD:443
+    remoteforward 1236 localhost:443
