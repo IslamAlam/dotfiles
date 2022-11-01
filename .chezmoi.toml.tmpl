@@ -2,7 +2,7 @@
     email = "is3mansour@gmail.com"
 [diff]
     command = "code"
-    args = ["--diff", "{{ .Destination }}", "{{ .Target }}"]
+    
 [edit]
     command = "code"
     args = ["--wait"]
@@ -11,7 +11,6 @@
     autoPush = true
 [merge]
     command = "nvim"
-    args = ["-d", "{{ .Destination }}", "{{ .Source }}", "{{ .Target }}"]
 
 # encryption = "gpg"
 [gpg]
