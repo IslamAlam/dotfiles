@@ -1,3 +1,15 @@
+# ### Bash
+
+# On macOS, for [bash](https://github.com/rbenv/rbenv/wiki/Unix-shell-initialization#bash), these files are source in the following order:
+
+# 1.  **login** mode:
+#     1.  `/etc/profile` (calling `path_helper`)
+#     2.  `~/.bash_profile`, `~/.bash_login`, `~/.profile` (only first one that exists)
+# 2.  interactive **non-login**:
+#     1.  `/etc/bash.bashrc` (some Linux; not on Mac OS X)
+#     2.  `~/.bashrc`
+# 3.  **non-interactive**:
+#     1.  source file in `$BASH_ENV`
 {{ if eq .chezmoi.os "darwin" }}
 {{   include ".bashrc_darwin" }}
 {{ end }}

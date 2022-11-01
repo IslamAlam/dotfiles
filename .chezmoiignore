@@ -19,3 +19,5 @@ README.md
 {{ if ne .chezmoi.os "linux" }}
 .bashrc_linux
 {{ end }}
+
+key.txt.age
