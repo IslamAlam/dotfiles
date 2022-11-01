@@ -37,7 +37,7 @@ StartLimitIntervalSec=5
 
 [Service]
 User=mans_is
-ExecStart=/usr/bin/autossh -M 0 -N -o "ServerAliveInterval 15" -o "ServerAliveCountMax 3" -o "ConnectTimeout 10" -o "ExitOnForwardFailure yes" -i /home/mans_is/.ssh/id_ed25519 -p 22 sshtunuser@138.246.233.193 -R 10222:localhost:22 -R 2443:localhost:443
+ExecStart=/usr/bin/autossh -M 0 -N -o "ServerAliveInterval 15" -o "ServerAliveCountMax 3" -o "ConnectTimeout 10" -o "ExitOnForwardFailure yes" -i ${HOME}/.ssh/id_ed25519 -p 22 sshtunuser@138.246.233.193 -R 10222:localhost:22 -R 2443:localhost:443
 Restart=always
 RestartSec=1
 
