@@ -7,6 +7,9 @@
 #   curl https://keybase.io/imansour/pgp_keys.asc | gpg --list-packets |
 #   awk '$1=="keyid:"{print$2;exit}')" trust 
 
+# To import keybase gpg keys
+# keybase pgp pull-private
+# keybase pgp push-private
 ### Import public keys from keybase
 curl https://keybase.io/imansour/pgp_keys.asc | gpg --import
 
