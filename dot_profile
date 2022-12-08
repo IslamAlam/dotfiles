@@ -25,6 +25,13 @@ fi
 if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
-. "$HOME/.cargo/env"
+
+if [ -d ${HOME}/.local/py-utils/bin ]; then
+	PATH="$PATH:${HOME}/.local/py-utils/bin"
+fi
+
+if [ -d ${HOME}/.cargo/env ]; then
+    . "$HOME/.cargo/env"
+fi
 
 # export GPG_TTY=$(tty)

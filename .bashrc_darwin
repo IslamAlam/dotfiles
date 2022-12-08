@@ -1,2 +1,7 @@
 # macOS .bashrc contents
 [ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
+
+
+export GPG_TTY=$(tty)
+export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+gpgconf --launch gpg-agent
