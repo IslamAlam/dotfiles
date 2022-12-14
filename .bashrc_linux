@@ -139,6 +139,26 @@ if command -v starship &> /dev/null; then
   eval "$(starship init bash)"
 fi
 
+## short cut to list tmux sessions
+tmux-ses(){
+	# get the IDs
+	ID="`tmux list-sessions`"
+	SESSION_TEMPLATE="`ls $HOME/.config/smug | sed -e \"s/\\.yml//g\"`"
+	if [[ -z "$ID" ]]; then
+		tmux new-session
+	fi
+	create_new_session="Create New Session"
+	ID="$ID\n${create_new_session}:"
+	ID="`echo $ID | fzf | cut -d: -f1`"
+	if [[ "$ID" = "${create_new_session}" ]]; then
+		tmux new-session
+	elif [[ -n "$ID" ]]; then
+		tmux attach-session -t "$ID"
+	else
+		:  # Start terminal normally
+	fi
+}
+
 export GPG_TTY=$(tty)
 export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
 gpgconf --launch gpg-agent
