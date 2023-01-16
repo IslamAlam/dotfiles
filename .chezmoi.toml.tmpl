@@ -2,15 +2,18 @@
     email = "is3mansour@gmail.com"
 [diff]
     command = "code"
+	args = ["--reuse-window", "--wait", "--diff", "{{ .Destination }}", "{{ .Target }}"]
+
+[merge]
+    command = "code"
+	args = ["--reuse-window", "--wait", "--merge", "{{ .Destination }}", "{{ .Source }}", "{{ .Target }}"]
 
 [edit]
     command = "code"
-    args = ["--wait"]
+    args = ["--reuse-window", "--wait"]
 [git]
-    autoCommit = true
+    autoCommit = false
     autoPush = true
-[merge]
-    command = "nvim"
 
 # encryption = "gpg"
 
