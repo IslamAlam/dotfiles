@@ -78,6 +78,20 @@ if [ -f "/data/largeHome/mans_is/.mambaforge/etc/profile.d/mamba.sh" ]; then
 fi
 
 #####################
+# TMUX             #
+#####################
+
+##### Install TMUX conf if not exist 
+TMUX_HOME="${HOME}/.tmux"
+if [[ ! -d ${TMUX_HOME} ]]; then
+    print -P "%F{33} %F{220}Installing %F{33}🇫🇷 Oh my tmux!%F{220} My self-contained, pretty & versatile tmux configuration made with ❤️ …%f"
+    command git clone https://github.com/gpakosz/.tmux.git "${TMUX_HOME}" && \
+        print -P "%F{33} %F{34}Installation successful.%f%b" || \
+        print -P "%F{160} The clone has failed.%f%b"
+	ln -s -f ~/.tmux/.tmux.conf
+fi
+
+#####################
 # ZINIT             #
 #####################
 
