@@ -40,3 +40,14 @@ if [ -f "${HOME}/.conda/etc/profile.d/conda.sh" ]; then
     . "${HOME}/.conda/etc/profile.d/conda.sh"
 fi
 
+if [[ -z "$LC_ALL" ]]; then
+  export LC_ALL='en_US.UTF-8'
+fi
+# LANG="en_US.utf8"
+# LC_COLLATE="C"
+# LC_CTYPE="C"
+# LC_MESSAGES="C"
+# LC_MONETARY="C"
+# LC_NUMERIC="C"
+# LC_TIME="C"
+# LC_ALL="C"
