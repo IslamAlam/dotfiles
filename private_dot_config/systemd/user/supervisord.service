@@ -1,0 +1,17 @@
+[Unit]
+Description=Supervisor process control system for UNIX
+Documentation=http://supervisord.org
+After=network.target
+
+[Service]
+# Type=forking
+ExecStart=%h/.local/py-utils/bin/supervisord --nodaemon -c %h/.local/etc/supervisor/supervisord.conf
+ExecStartPost=%h/.local/py-utils/bin/supervisorctl -c %h/.local/etc/supervisor/supervisord.conf
+ExecStop=%h/.local/py-utils/bin/supervisorctl -c %h/.local/etc/supervisor/supervisord.conf $OPTIONS shutdown
+ExecReload=%h/.local/py-utils/bin/supervisorctl -c %h/.local/etc/supervisor/supervisord.conf $OPTIONS reload
+KillMode=process
+Restart=on-failure
+RestartSec=20s
+
+[Install]
+WantedBy=multi-user.target
