@@ -1,0 +1,87 @@
+#!python
+
+# Enable logging
+import logging
+import os
+import pathlib
+import secrets
+import subprocess
+import sys
+from subprocess import call
+
+logging.basicConfig(
+    format='%(asctime)s [%(levelname)s] %(message)s', 
+    level=logging.INFO, 
+    stream=sys.stdout)
+
+log = logging.getLogger(__name__)
+
+HOME = os.getenv("HOME", "/root")
+NB_USER = os.getenv("USER", "1000")
+NB_GID = os.getenv("GID", "100")
+RESOURCES_PATH = os.getenv("RESOURCES_PATH", "{}/.local/opt".format(HOME))
+
+
+VNC_PW = os.getenv("VNC_PW", "vncpassword")
+
+if VNC_PW == None or VNC_PW == 'automated':
+    vnc_passwd = secrets.token_urlsafe()[:8]
+    vnc_viewonly_passwd = secrets.token_urlsafe()[:8]
+    
+else:
+    vnc_passwd = VNC_PW
+    vnc_viewonly_passwd = secrets.token_urlsafe()[:8]
+
+print("✂️"*24)
+print("VNC path: {}".format(RESOURCES_PATH))
+print("VNC password: {}".format(vnc_passwd))
+print("VNC view only password: {}".format(vnc_viewonly_passwd))
+print("✂️"*24)
+
+vncpasswd_input = "{0}\\n{1}".format(vnc_passwd, vnc_viewonly_passwd)
+vnc_user_dir = pathlib.Path.home().joinpath(".vnc")
+vnc_user_dir.mkdir(exist_ok=True)
+vnc_user_passwd = vnc_user_dir.joinpath("passwd")
+
+with vnc_user_passwd.open('wb') as f:
+    subprocess.run(
+        ["{}/TurboVNC/bin/vncpasswd".format(RESOURCES_PATH), "-f"],
+        stdout=f,
+        input=vncpasswd_input,
+        universal_newlines=True,
+        check=True)
+    
+vnc_user_passwd.chmod(0o600)
+
+print("noVNC URL:  https://localhost:5801/vnc.html?host=localhost&port=5901&encrypt=1&password={}".format(VNC_PW))
+
+subprocess.call(
+    ["{}/TurboVNC/bin/vncserver ".format(RESOURCES_PATH) +
+    " -localhost " +
+    " -novnc {}/novnc ".format(RESOURCES_PATH) +
+    # " -xstartup /usr/bin/startxfce4 " + 
+	" -xstartup /usr/bin/startplasma-x11 " + 
+	" :1 " + 
+	"-fg"],
+    shell=True
+)
+
+# subprocess.call(
+#     ["{}/TurboVNC/bin/vncserver ".format(RESOURCES_PATH) +
+#     " -localhost " +
+#     " -novnc {}/novnc ".format(RESOURCES_PATH) +
+#     " -xstartup /usr/bin/startplasma-x11 :1 -fg"],
+#     shell=True
+# )
+
+# subprocess.call(
+#     ["{}/TurboVNC/bin/vncserver ".format(RESOURCES_PATH) +
+#     " -SecurityTypes None " +
+#     " -xstartup 'dbus-launch startxfce4' " +
+#     " -fg"],
+#     shell=True
+
+# )
+
+# #Disable screensaver because no one would want it.
+# (pathlib.Path.home() / ".xscreensaver").write_text("mode: off\\n")
