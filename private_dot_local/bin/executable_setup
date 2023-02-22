@@ -1,0 +1,1407 @@
+#!/bin/bash
+#
+# This file helps me remember how to install the various useful tools
+# that I like being able to use, but that I might not need installed on
+# every login account everywhere, so they do not belong in one of the
+# other ,set-* scripts but here where I can opt to run them separately.
+cd "$(dirname "$0")" 
+
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
+
+
+
+set -e
+
+if [ "$(id -u)" = "0" ]
+then
+    echo 'Error: this script should not be run as root' >&2
+    #exit 1
+fi
+
+
+is_user_root ()
+{
+    [ "$(id -u)" -eq 0 ]
+}
+
+
+extract_font(){
+    mkdir -p /tmp/fonts
+    echo "Downloading font: $1 ";
+    FONT_NAME=$1;
+    # Get latest version of the font
+    NERD_FONT_VERSION=${VERSION:-$(echo_latest_version  ryanoasis/nerd-fonts)}
+    echo "Nerd Fonts: ${NERD_FONT_VERSION}"
+
+    curl -fLo /tmp/font-${FONT_NAME}.zip https://github.com/ryanoasis/nerd-fonts/releases/download/v${NERD_FONT_VERSION}/${FONT_NAME}.zip;
+	unzip -o -C /tmp/font-${FONT_NAME}.zip "**omplete.ttf" -d /tmp/fonts; 
+    }
+
+	# unzip -o -C /tmp/Font-${FONT_NAME}.zip "**omplete.ttf" -d /usr/share/fonts; }
+if [ "$(id -u)" = "0" ]
+then
+    echo 'Error: this script should not be run as root' >&2
+    #exit 1
+fi
+
+case "$1" in
+"ag" )
+    V=2.2.0
+
+    cd /tmp
+    curl -OL https://github.com/ggreer/the_silver_searcher/archive/$V.tar.gz
+    tar xvfz $V.tar.gz
+
+    cd the_silver_searcher-$V
+    ./build.sh
+    ./configure --prefix=$HOME/local
+    make
+    make install
+
+    cd /tmp
+    rm -r $V.tar.gz the_silver*
+    ;;
+
+"setup" )
+    sudo apt-get update
+
+    # Avoid "perl" locale errors and the "locale" error:
+    # locale: Cannot set LC_ALL to default locale: No such file or directory
+
+    sudo locale-gen en_US en_US.UTF-8
+    sudo dpkg-reconfigure --frontend=noninteractive locales
+
+    # Install happy packages.
+
+    apt-cache search . | awk '{print $1}' > /tmp/all-package-names
+
+    for package in \
+        adb android-sdk-platform-tools-common `: for backing up an Android phone` \
+        apt-file         `: to find where files come from` \
+        aptitude         `: to find "related" which packages aptitude why pkg-name` \
+        autocutsel       `: unifies the X Windows clipboard and selection` \
+        cabextract       `: for extracting binary Windows drivers ` \
+        colordiff wdiff  `: for the occasional need to diff outside of git ` \
+        cscope           `: for that rare trawl through C code ` \
+        csvkit           `: manipulate data from the command line` \
+        dos2unix         `: for removing CR chars or, more rarely, adding them` \
+        dvipng           `: so sympy can render to PNG with LaTeX` \
+        emacs            `: editor-of-choice` \
+        emacs-el         `: readable LISP source` \
+        exuberant-ctags  `: ancient source scanning tool` \
+        fvwm             `: window manager` \
+        fonts-inconsolata `: favorite console font` \
+        fonts-sil-gentium `: font for presentation slides` \
+        fzf              `: very well-designed interactive selection tool` \
+        git              `: distributed version control` \
+        gnumeric         `: spreadsheet` \
+        golang-go        `: for editor tools like gofmt and go language server` \
+        groff            `: for processing old documents` \
+        html2text        `: when data is available in no better format` \
+        htop             `: much better "top" command` \
+        indicator-cpufreq `: for pegging the CPU speed when I need to` \
+        inkscape         `: SVG editing` \
+        inotify-tools    `: for waiting on files to change` \
+        intel-microcode  `: processor bugfixes, if applicable` \
+        libnotify-bin    `: so my scripts can issue desktop notifications` \
+        libreadline-dev  `: for compiling Python from source` \
+        jq               `: like grep but for JSON` \
+        mercurial        `: for running integration tests on uncommitted project` \
+        mplayer geeqie   `: for media` \
+        openssh-server   `: secure shell` \
+        pandoc           `: requirement of nbconvert for the IPython notebook` \
+        pcregrep         `: reasonable RE syntax, and can capture groups` \
+        pdftk            `: perform various useful operations on PDFs` \
+        pm-utils         `: so I can suspend the machine from its command line` \
+        pwgen            `: random passwords` \
+        pypy pypy-dev    `: for when I want to be fast` \
+        python3 python3-dev `: for when I feel modern` \
+        libssl-dev       `: for compiling things that need cryptography` \
+        nautilus         `: for mounting and unmounting flash drives` \
+        nmap             `: for finding the IP address of printers on the LAN` \
+        recordmydesktop  `: for screencasts` \
+        s3cmd            `: the cloud` \
+        subversion       `: for running integration tests on uncommitted project` \
+        suckless-tools   `: simple tools to go with my simple window manager` \
+        stellarium       `: to quickly answer what-is-that-over-there questions` \
+        sqlite3          `: for command-line access to its databases` \
+        ssh-import-id    `: for import ssh keys from github` \
+        texlive-latex-recommended `: for building PDF documentation with Sphinx` \
+        texlive-latex-extra \
+        texlive-fonts-recommended \
+        texlive-extra-utils `: to get pdfnup` \
+        traceroute       `: when I want something quieter than mtr` \
+        trayer           `: lets me click the network manager` \
+        tree             `: for when ls is simply not enough` \
+        ttf-mscorefonts-installer `: for browsing the web` \
+        ttf-ubuntu-font-family `: default Ubuntu font family, for emacs` \
+        units            `: desk calculator` \
+        vagrant          `: for various virtualization tasks` \
+        wakeonlan        `: for waking up other machines I have suspended` \
+        whois            `: for searching the domain name registries` \
+        wireshark        `: primarily for debugging TCP` \
+        xautolock        `: to lock my screen` \
+        xbacklight       `: so FVWM key bindings can adjust screen brightness` \
+        xclip            `: let shell scripts get and set the paste buffer` \
+        xdotool          `: for generating keyboard and mouse actions` \
+        xinput           `: set properties of keyboards, mice, trackpads` \
+        xfce4-notifyd    `: desktop notifications that I can click to dismiss` \
+        xfce4-screenshooter `: for taking screenshots` \
+        xserver-xephyr   `: confine apps to a recursive X server in a window` \
+        xsnow            `: tis the season` \
+        yubikey-manager  `: command line tool` \
+        zsh              `: favorite shell` \
+        \
+        `: Mount remote filesystems` \
+        bindfs encfs smbnetfs sshfs \
+        \
+        `: for building tools like ag and ledger` \
+        automake libpcre3-dev pkg-config \
+        \
+        `: for lxml` \
+        libxml2-dev libxslt1-dev \
+        \
+        `: Hettinger reminded me how awesome these tools are` \
+        graphviz python-blockdiag python-seqdiag python-actdiag python-nwdiag \
+        \
+        `: Verbatim list of dependencies for pyenv` \
+        make build-essential libssl-dev zlib1g-dev libbz2-dev \
+        libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
+        xz-utils tk-dev libffi-dev liblzma-dev python-openssl git
+    do
+        echo $package
+    done |
+        sort - /tmp/all-package-names |
+        uniq -c |
+        awk '$1 == 2 {print $2}' > /tmp/existing-packages
+
+    sudo apt-get install --ignore-missing -y $(cat /tmp/existing-packages)
+    ;;
+
+"docker" )
+    sudo apt-get update
+    sudo apt-get install \
+        ca-certificates \
+        curl \
+        gnupg \
+        lsb-release \
+        uidmap
+    # curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    # echo \
+    #     "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+    #     $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    #sudo apt-get update
+    #sudo apt-get install docker-ce docker-ce-cli containerd.io
+    #curl -fsSL https://get.docker.com | sh -s --
+    sudo groupadd docker >&/dev/null
+    sudo usermod -aG docker $USER
+    newgrp docker
+    sudo systemctl enable docker.service
+    sudo systemctl enable containerd.service
+    sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    sudo chmod +x /usr/local/bin/docker-compose
+    sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+    sudo curl \
+        -L https://raw.githubusercontent.com/docker/compose/1.29.2/contrib/completion/bash/docker-compose \
+        -o /etc/bash_completion.d/docker-compose
+        
+    docker-compose --version
+    ;;
+
+
+"bcompare" )
+    cd /tmp
+    wget https://www.scootersoftware.com/bcompare-4.4.1.26165.x86_64.tar.gz
+    tar zxvf bcompare-*.tar.gz
+    cd bcompare-*/
+    ./install.sh --prefix=$HOME/.local/
+    ;;
+
+"anaconda" )
+    cd
+    mini=Miniconda3-4.2.12-Linux-x86_64.sh
+    wget -c https://repo.continuum.io/miniconda/$mini
+    if ! echo d0c7c71cc5659e54ab51f2005a8d96f3 $mini | md5sum -c -
+    then exit 1
+    fi
+    bash $mini -b -p .anaconda
+    ~/.anaconda/bin/conda upgrade --all -y
+    ;;
+    
+"miniforge" )
+    cd /tmp
+    CONDA_MIRROR=https://github.com/conda-forge/miniforge/releases/latest/download
+    conda_version="4.11.0"
+    # Miniforge installer patch version
+    miniforge_patch_number="4"
+    # Miniforge installer architecture
+    # miniforge_arch="x86_64"
+    miniforge_arch=$(uname -m)
+    # Package Manager and Python implementation to use (https://github.com/conda-forge/miniforge)
+    # - conda only: either Miniforge3 to use Python or Miniforge-pypy3 to use PyPy
+    # - conda + mamba: either Mambaforge to use Python or Mambaforge-pypy3 to use PyPy
+    miniforge_python="Mambaforge"
+
+    # Miniforge archive to install
+    miniforge_version="${conda_version}-${miniforge_patch_number}"
+    # Miniforge installer
+    miniforge_installer="${miniforge_python}-${miniforge_version}-Linux-${miniforge_arch}.sh"
+    # Miniforge checksum
+    # Configure environment
+    CONDA_DIR=$HOME/.conda
+    CONDA_DIR=$HOME/opt/miniforge 
+
+    if [ -w "/opt" ]; then echo "Install in /opt" && CONDA_DIR=/opt/miniforge; else echo "Install in $CONDA_DIR" && CONDA_DIR=$CONDA_DIR; fi
+
+    export PATH="${CONDA_DIR}/bin:${PATH}"
+    CONDA_VERSION="${conda_version}"
+    CONDA_EXE=${CONDA_DIR}/bin/conda
+    MINIFORGE_VERSION="${miniforge_version}"
+    PYTHON_VERSION=default
+
+    # Install section
+    wget --quiet "${CONDA_MIRROR}/${miniforge_installer}" -O ${miniforge_installer}
+    miniforge_checksum=$(wget "${CONDA_MIRROR}/${miniforge_installer}.sha256"  -q -O - | cut -f1 -d" ")
+    echo ${miniforge_checksum}
+    echo "${miniforge_checksum} *${miniforge_installer}" | sha256sum --check 
+    echo "Install conda in ${CONDA_DIR} version ${miniforge_installer}"
+    rm -rf $CONDA_DIR 
+    /bin/bash "${miniforge_installer}" -f -b -p $CONDA_DIR 
+    rm "${miniforge_installer}" 
+    #eval "$(command ${CONDA_DIR}/bin/conda shell.bash hook)"
+    # eval "$("${CONDA_EXE}" shell hook --shell=bash)"
+    # echo "eval '$("${CONDA_EXE}" shell hook --shell=bash 2> /dev/null)'" >> $HOME/.bashrc
+    # echo "export ${CONDA_DIR}/etc/profile.d/conda.sh" >> $HOME/.bashrc
+    echo "Pin conda and python"
+    echo ". ${CONDA_DIR}/etc/profile.d/conda.sh" >> $HOME/.bashrc
+    eval $(echo ". ${CONDA_DIR}/etc/profile.d/conda.sh")
+    # Conda configuration see https://conda.io/projects/conda/en/latest/configuration.html
+    echo "conda ${CONDA_VERSION}" >> $CONDA_DIR/conda-meta/pinned 
+    conda config --system --set auto_update_conda true 
+    conda config --system --set show_channel_urls true 
+    if [ ! $PYTHON_VERSION = 'default' ]; then mamba install --quiet --yes python="${PYTHON_VERSION}"; fi
+    # Pin major.minor version of python 
+    mamba list python | grep '^python ' | tr -s ' ' | cut -d ' ' -f 1,2 >> "${CONDA_DIR}/conda-meta/pinned"
+    # Using conda to update all packages: https://github.com/mamba-org/mamba/issues/1092
+    
+
+    echo "Update conda"
+    conda update --all --quiet --yes 
+    echo "Install essential packages"
+    mamba install --quiet --yes \
+    "conda=${CONDA_VERSION}" \
+        'pip' \
+        'tini=0.19.0' \
+        'yarn' \
+        'nodejs=14.*' \
+        'supervisor' \
+        'zsh' \
+        'black' 'isort' 'yapf' 'flake8' 'mypy' \
+        'git' \
+        'gitpython' \
+        'gitdb' \
+        'git-lfs' \
+        'rust'
+    # conda list tini | grep tini | tr -s ' ' | cut -d ' ' -f 1,2 >> $CONDA_DIR/conda-meta/pinned 
+    conda clean --all -f -y 
+    rm -rf $HOME/.cache/yarn 
+
+   ;;
+
+"ohmyzsh" )
+    cd
+    git clone https://github.com/ohmyzsh/ohmyzsh.git ~/.oh-my-zsh
+    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:=~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:=~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+    git clone https://github.com/zsh-users/zsh-history-substring-search ${ZSH_CUSTOM:=~/.oh-my-zsh/custom}/plugins/zsh-history-substring-search
+    git clone https://github.com/zsh-users/zsh-completions ${ZSH_CUSTOM:=~/.oh-my-zsh/custom}/plugins/zsh-completions
+    git clone https://github.com/supercrabtree/k ${ZSH_CUSTOM:=~/.oh-my-zsh/custom}/plugins/k
+    git clone https://github.com/chrissicool/zsh-256color ${ZSH_CUSTOM:=~/.oh-my-zsh/custom}/plugins/zsh-256color
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:=~/.oh-my-zsh/custom}/themes/powerlevel10k
+    
+    # Install Chrome
+    # https://github.com/alecthomas/chroma/releases/download/v0.10.0/chroma-0.10.0-linux-amd64.tar.gz
+    
+    CACHE_DIR=/tmp/chroma-cache
+    STANDALONE_INSTALL_PREFIX=${STANDALONE_INSTALL_PREFIX:-$HOME/.local}
+    VERSION=${VERSION:-$(echo_latest_version  alecthomas/chroma)}
+    ARCH=amd64
+    
+    mkdir -p  "$CACHE_DIR" "$STANDALONE_INSTALL_PREFIX/lib/chroma" "$STANDALONE_INSTALL_PREFIX/bin"
+    
+    echo "Installing v$VERSION of the $ARCH release from GitHub."
+    echo
+    # https://github.com/alecthomas/chroma/releases/download/v2.0.0-alpha2/chroma-2.0.0-alpha2-linux-amd64.tar.gz
+    fetch "https://github.com/alecthomas/chroma/releases/download/v$VERSION/chroma-$VERSION-linux-$ARCH.tar.gz" \
+        "$CACHE_DIR/chroma-$VERSION.tar.gz"
+    tar -C "$STANDALONE_INSTALL_PREFIX/lib/chroma" -xzf "$CACHE_DIR/chroma-$VERSION.tar.gz"
+    ln -fs "$STANDALONE_INSTALL_PREFIX/lib/chroma/chroma" "$STANDALONE_INSTALL_PREFIX/bin/chroma"
+    
+    # Install Fonts
+    mkdir -p ~/.fonts
+    cd ~/.fonts
+    wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf
+    wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf
+    wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf
+    wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf
+    # 2. Optionally, backup your existing ~/.zshrc file
+    cp ~/.zshrc ~/.zshrc.orig
+    # 3. Create a new zsh configuration file
+    cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc
+    chsh -s $(which zsh)
+    ;;
+
+"tigervnc" )
+    cd /tmp
+    CACHE_DIR=/tmp/turbovnc
+    STANDALONE_INSTALL_PREFIX=${STANDALONE_INSTALL_PREFIX:-$HOME/.local}
+    VERSION=${VERSION:-$(echo_latest_version  TurboVNC/turbovnc)}
+    VERSION=2.2.7
+    ARCH=amd64
+
+    libjpeg_ver="2.0.6"
+    virtualGL_ver="2.6.5"
+    turboVNC_ver="3.0.2"
+
+    echo "Installing v$VERSION of the $ARCH release from GitHub."
+    echo
+    mkdir -p  "$CACHE_DIR" "$STANDALONE_INSTALL_PREFIX/share/turbovnc" "$STANDALONE_INSTALL_PREFIX/bin"
+
+    fetch   "https://sourceforge.net/projects/virtualgl/files/${virtualGL_ver}/virtualgl_${virtualGL_ver}_$ARCH.deb/download" \
+        "$CACHE_DIR/virtualgl_${virtualGL_ver}_$ARCH.deb"
+
+    fetch   "https://sourceforge.net/projects/libjpeg-turbo/files/${libjpeg_ver}/libjpeg-turbo-official_${libjpeg_ver}_$ARCH.deb/download" \
+        "$CACHE_DIR/libjpeg-turbo-official_${libjpeg_ver}_$ARCH.deb"
+
+    fetch   "https://sourceforge.net/projects/turbovnc/files/${turboVNC_ver}/turbovnc_${turboVNC_ver}_$ARCH.deb/download" \
+        "$CACHE_DIR/turbovnc_${turboVNC_ver}_$ARCH.deb"
+
+    
+    
+    # https://rawcdn.githack.com/TurboVNC/turbovnc/2.2.7/doc/index.html
+    cd $CACHE_DIR
+    sudo apt install ./libjpeg-turbo*.deb
+    sudo apt install ./virtualgl*.deb
+    sudo apt install ./turbovnc*.deb
+
+    # https://gist.github.com/cyberang3l/422a77a47bdc15a0824d5cca47e64ba2
+    # mkdir ~/turbovnc
+    # cd ~/turbovnc
+    # rpm2cpio full/path/of/turbovnc*.rpm | cpio -idv
+    ## Debian-based systems
+    # dpkg-deb –extract full/path/of/turbovnc*.deb ~/turbovnc
+
+    # tar -C "$STANDALONE_INSTALL_PREFIX/share/turbovnc" -xzf "$CACHE_DIR/turbovnc-$VERSION.tar.gz"
+    # ln -fs "$STANDALONE_INSTALL_PREFIX/share/turbovnc/turbovnc" "$STANDALONE_INSTALL_PREFIX/bin/chroma"
+    # https://gist.github.com/dcommander/fc608434735026dd8215
+    # bash ./gencert.cn 
+    ;;
+
+"turbovnc" )
+    cd /tmp
+    CACHE_DIR=/tmp/turbovnc
+    STANDALONE_INSTALL_PREFIX=${STANDALONE_INSTALL_PREFIX:-$HOME/.local}
+    # ARCH=amd64
+    # ARCH=$(uname -m)
+    ARCH=$(dpkg --print-architecture)
+
+    libjpeg_ver="2.0.6"
+    virtualGL_ver="2.6.5"
+    turboVNC_ver="3.0.2"
+    turboVNC_ver=${turboVNC_ver:-$(echo_latest_version TurboVNC/turbovnc)}
+
+    NOVNC_VERSION=${NOVNC_VERSION:-$(echo_latest_version novnc/noVNC)}
+    WEBSOCKETIFY_VERSION=${WEBSOCKETIFY_VERSION:-$(echo_latest_version novnc/websockify)}
+
+    mkdir -p  "$CACHE_DIR" "$STANDALONE_INSTALL_PREFIX/share/turbovnc" "$STANDALONE_INSTALL_PREFIX/bin"
+
+    fetch   "https://sourceforge.net/projects/virtualgl/files/${virtualGL_ver}/virtualgl_${virtualGL_ver}_$ARCH.deb/download" \
+        "$CACHE_DIR/virtualgl_${virtualGL_ver}_$ARCH.deb"
+
+    fetch   "https://sourceforge.net/projects/libjpeg-turbo/files/${libjpeg_ver}/libjpeg-turbo-official_${libjpeg_ver}_$ARCH.deb/download" \
+        "$CACHE_DIR/libjpeg-turbo-official_${libjpeg_ver}_$ARCH.deb"
+
+    fetch   "https://sourceforge.net/projects/turbovnc/files/${turboVNC_ver}/turbovnc_${turboVNC_ver}_$ARCH.deb/download" \
+        "$CACHE_DIR/turbovnc_${turboVNC_ver}_$ARCH.deb"
+
+    if is_user_root; then
+        echo 'You are the almighty root!'
+        # You can do whatever you need...
+        RESOURCES_PATH="/opt"
+        mkdir -p ${RESOURCES_PATH}
+        rm -rf ${RESOURCES_PATH}/novnc
+        mkdir -p ${RESOURCES_PATH}/novnc
+        # chown $UID:$GID ${RESOURCES_PATH}/novnc
+        cd $CACHE_DIR
+
+        # https://rawcdn.githack.com/TurboVNC/turbovnc/2.2.7/doc/index.html
+        sudo apt install ./libjpeg-turbo*.deb
+        sudo apt install ./virtualgl*.deb
+        sudo apt install ./turbovnc*.deb
+    else
+        echo 'You are just an ordinary user.' >&2
+        RESOURCES_PATH="${HOME}/.local/opt"
+        mkdir -p ${RESOURCES_PATH}
+        rm -rf ${RESOURCES_PATH}/novnc
+        mkdir -p ${RESOURCES_PATH}/novnc
+
+        echo "Installing turbovnc: v$turboVNC_ver."
+        dpkg-deb -xv $CACHE_DIR/turbovnc_${turboVNC_ver}_$ARCH.deb $CACHE_DIR >/dev/null;
+        cp -rf $CACHE_DIR/opt/* ${RESOURCES_PATH}
+
+        echo "Installing noVNC: v$NOVNC_VERSION."
+        # unzip $CACHE_DIR/novnc-install.tar.gz -d ${RESOURCES_PATH}/novnc
+        mkdir -p ${RESOURCES_PATH}/novnc && tar -xzf $CACHE_DIR/novnc-install.tar.gz --strip-components=1 -C ${RESOURCES_PATH}/novnc
+
+        echo "Installing websockify: v$WEBSOCKETIFY_VERSION."
+        mkdir -p ${RESOURCES_PATH}/novnc/utils/websockify && tar -xzf $CACHE_DIR/websockify-install.tar.gz --strip-components=1 -C ${RESOURCES_PATH}/novnc/utils/websockify
+        
+        # Test TurboVNC
+        # ${RESOURCES_PATH}/TurboVNC/bin/vncserver -kill :1 
+        ${RESOURCES_PATH}/TurboVNC/bin/vncserver -localhost -novnc ${RESOURCES_PATH}/novnc :1
+        ${RESOURCES_PATH}/TurboVNC/bin/vncserver -kill :1 
+
+    fi
+
+    # https://gist.github.com/cyberang3l/422a77a47bdc15a0824d5cca47e64ba2
+    # mkdir ~/turbovnc
+    # cd ~/turbovnc
+    # rpm2cpio full/path/of/turbovnc*.rpm | cpio -idv
+    ## Debian-based systems
+    # dpkg-deb –extract full/path/of/turbovnc*.deb ~/turbovnc
+
+    # tar -C "$STANDALONE_INSTALL_PREFIX/share/turbovnc" -xzf "$CACHE_DIR/turbovnc-$VERSION.tar.gz"
+    # ln -fs "$STANDALONE_INSTALL_PREFIX/share/turbovnc/turbovnc" "$STANDALONE_INSTALL_PREFIX/bin/chroma"
+    # https://gist.github.com/dcommander/fc608434735026dd8215
+    # bash ./gencert.cn 
+    SUBJ="/C=DE/ST=Bayern/L=Munich/O=The VirtualGL Project/OU=Software Development/"
+    openssl req -nodes -x509 -newkey rsa:4096 -keyout ~/.vnc/x509_private.pem -out ~/.vnc/x509_cert.pem -sha256 -days 3650 -subj "$SUBJ""CN=`hostname`"
+
+    ;;
+
+
+"turbovnc-rpm" )
+    cd /tmp
+    CACHE_DIR=/tmp/turbovnc
+    STANDALONE_INSTALL_PREFIX=${STANDALONE_INSTALL_PREFIX:-$HOME/.local}
+    VERSION=${VERSION:-$(echo_latest_version  TurboVNC/turbovnc)}
+    VERSION=2.2.7
+    ARCH=amd64
+
+    libjpeg_ver="2.0.6"
+    virtualGL_ver="2.6.5"
+    turboVNC_ver="2.2.6"
+
+    echo "Installing v$VERSION of the $ARCH release from GitHub."
+    echo
+    mkdir -p  "$CACHE_DIR" "$STANDALONE_INSTALL_PREFIX/share/turbovnc" "$STANDALONE_INSTALL_PREFIX/bin"
+    #fetch   "https://sourceforge.net/projects/turbovnc/files/$VERSION/turbovnc-$VERSION.tar.gz/download" \
+    #    "$CACHE_DIR/turbovnc-$VERSION.tar.gz"
+    # https://s3.amazonaws.com/turbovnc-pr/2.2.x/linux/turbovnc-2.2.8.tar.gz
+    ARCH=x86_64
+
+    fetch   "https://sourceforge.net/projects/virtualgl/files/${virtualGL_ver}/VirtualGL-${virtualGL_ver}.$ARCH.rpm/download" \
+        "$CACHE_DIR/VirtualGL-${virtualGL_ver}.$ARCH.rpm"
+
+    fetch   "https://sourceforge.net/projects/libjpeg-turbo/files/${libjpeg_ver}/libjpeg-turbo-official-${libjpeg_ver}.$ARCH.rpm/download" \
+        "$CACHE_DIR/libjpeg-turbo-official_${libjpeg_ver}.$ARCH.rpm"
+
+    fetch   "https://sourceforge.net/projects/turbovnc/files/${turboVNC_ver}/turbovnc-${turboVNC_ver}.$ARCH.rpm/download" \
+        "$CACHE_DIR/turbovnc_${turboVNC_ver}.$ARCH.rpm"
+
+        https://sourceforge.net/projects/turbovnc/files/2.2.6/turbovnc-2.2.6.x86_64.rpm/download
+    
+    # https://rawcdn.githack.com/TurboVNC/turbovnc/2.2.7/doc/index.html
+    cd $CACHE_DIR
+    INSTALL_DIR=$HOME/.local/share/turbovnc
+    mkdir -p $INSTALL_DIR
+    cd  $INSTALL_DIR
+    rpm2cpio $CACHE_DIR/VirtualGL*.rpm | cpio -idv
+    rpm2cpio $CACHE_DIR/libjpeg*.rpm | cpio -idv
+    rpm2cpio $CACHE_DIR/turbovnc*.rpm | cpio -idv
+
+    mkdir -p ~/.vnc/
+    cp etc/turbovncserver.conf ~/.vnc/turbovncserver.conf
+
+    # Download noVNC
+    NOVNC_VERSION=v1.3.0
+    NOVNC_TARBALL_URL=https://github.com/novnc/noVNC/archive/${NOVNC_VERSION}.tar.gz
+    NOVNC_TARBALL_CHECKSUM=ee8f91514c9ce9f4054d132f5f97167ee87d9faa6630379267e569d789290336
+    curl -Lo /tmp/novnc.tgz "${NOVNC_TARBALL_URL:?}"
+    printf '%s' "${NOVNC_TARBALL_CHECKSUM:?}  /tmp/novnc.tgz" | sha256sum -c
+    mkdir -p /tmp/novnc/ && tar -xzf /tmp/novnc.tgz --strip-components=1 -C /tmp/novnc/
+
+    # Download Websockify
+    WEBSOCKIFY_VERSION=v0.10.0
+    WEBSOCKIFY_TARBALL_URL=https://github.com/novnc/websockify/archive/${WEBSOCKIFY_VERSION}.tar.gz
+    WEBSOCKIFY_TARBALL_CHECKSUM=7bd99b727e0be230f6f47f65fbe4bd2ae8b2aa3568350148bdf5cf440c4c6b4a
+    curl -Lo /tmp/websockify.tgz "${WEBSOCKIFY_TARBALL_URL:?}"
+    printf '%s' "${WEBSOCKIFY_TARBALL_CHECKSUM:?}  /tmp/websockify.tgz" | sha256sum -c
+    mkdir -p /tmp/websockify/ && tar -xzf /tmp/websockify.tgz --strip-components=1 -C /tmp/websockify/
+    
+    # mkdir ~/.local/share/novnc
+    # cd  ~/.local/share/novnc
+    # Copy noVNC
+    cp -r /tmp/novnc/ $INSTALL_DIR/opt/novnc/
+
+    # Copy Websockify
+    cp -r /tmp/websockify/ $INSTALL_DIR/opt/novnc/utils/websockify/
+
+    # Run NoVNC
+    cd $INSTALL_DIR/opt/novnc/utils/websockify/
+    python3 -m websockify --web $INSTALL_DIR/opt/novnc/ 6080 127.0.0.1:5900
+    # ln -s $INSTALL_DIR/opt/TurboVNC/bin/* $INSTALL_DIR/opt/VirtualGL/bin/* /usr/local/bin/
+    ln -s $INSTALL_DIR/opt/TurboVNC/bin/* $INSTALL_DIR/opt/VirtualGL/bin/* ~/.local/bin 
+    # RUN cd /tmp \
+    # && curl -fsSL -O https://netix.dl.sourceforge.net/project/turbovnc/${TURBOVNC_VERSION}/turbovnc_${TURBOVNC_VERSION}_amd64.deb \
+    #     -O https://netix.dl.sourceforge.net/project/libjpeg-turbo/${LIBJPEG_VERSION}/libjpeg-turbo-official_${LIBJPEG_VERSION}_amd64.deb \
+    #     -O https://netix.dl.sourceforge.net/project/virtualgl/${VIRTUALGL_VERSION}/virtualgl_${VIRTUALGL_VERSION}_amd64.deb \
+    #     && dpkg -i *.deb \
+    #     && rm -f /tmp/*.deb \
+    #     && sed -i 's/$host:/unix:/g' /opt/TurboVNC/bin/vncserver
+
+    # RUN ln -s /opt/TurboVNC/bin/* /opt/VirtualGL/bin/* /usr/local/bin/
+    # Configure VGL for use in a single user environment.
+    # This may trigger a warning about display managers needing to be restarted.
+    # This can be ignored as the VNC server manages this lifecycle.  
+
+    # https://gist.github.com/cyberang3l/422a77a47bdc15a0824d5cca47e64ba2
+    # mkdir ~/turbovnc
+    # cd ~/turbovnc
+    # rpm2cpio full/path/of/turbovnc*.rpm | cpio -idv
+    ## Debian-based systems
+    # dpkg-deb –extract full/path/of/turbovnc*.deb ~/turbovnc
+
+    # tar -C "$STANDALONE_INSTALL_PREFIX/share/turbovnc" -xzf "$CACHE_DIR/turbovnc-$VERSION.tar.gz"
+    # ln -fs "$STANDALONE_INSTALL_PREFIX/share/turbovnc/turbovnc" "$STANDALONE_INSTALL_PREFIX/bin/chroma"
+    # https://gist.github.com/dcommander/fc608434735026dd8215
+    # bash ./gencert.cn 
+    ;;
+
+"novnc" )
+    cd /tmp
+    CACHE_DIR=/tmp/novnc-cache
+    STANDALONE_INSTALL_PREFIX=${STANDALONE_INSTALL_PREFIX:-$HOME/.local}
+    novnc_ver=${VERSION:-$(echo_latest_version novnc/noVNC)}
+
+    echo "noVNC: ${novnc_ver}"
+    echo "Installing v$VERSION of the $ARCH release from GitHub."
+    echo
+
+    fetch "https://github.com/novnc/noVNC/archive/refs/tags/v${novnc_ver}.tar.gz" \
+        "$CACHE_DIR/novnc-${novnc_ver}.tar.gz"
+
+    mkdir -p "$STANDALONE_INSTALL_PREFIX/lib" "$STANDALONE_INSTALL_PREFIX/bin"
+    tar -C "$STANDALONE_INSTALL_PREFIX/lib" -xzf "$CACHE_DIR/novnc-${novnc_ver}.tar.gz"
+    ln -fs "$STANDALONE_INSTALL_PREFIX/lib/noVNC-${novnc_ver}" "$STANDALONE_INSTALL_PREFIX/lib/novnc"
+
+
+    mkdir -p "$STANDALONE_INSTALL_PREFIX/lib/novnc/utils/websockify"
+    VERSION="0.10.0"
+    websockify_ver=${VERSION:-$(echo_latest_version novnc/websockify)}
+    echo "websockify: ${websockify_ver}"
+    fetch "https://github.com/novnc/websockify/archive/refs/tags/v${websockify_ver}.tar.gz" \
+        "$CACHE_DIR/websockify-${websockify_ver}.tar.gz"
+
+    tar --strip 1 -C "$STANDALONE_INSTALL_PREFIX/lib/novnc/utils/websockify" -xzf  "$CACHE_DIR/websockify-${websockify_ver}.tar.gz"
+    
+    chmod +x -v "$STANDALONE_INSTALL_PREFIX/lib/novnc/utils/novnc_proxy"
+    ;;
+
+"ubunutu-desktop" )
+    sudo apt update && sudo apt install -y tasksel
+    tasksel --list-tasks
+    sudo tasksel install ubuntu-desktop
+    sudo tasksel install xubuntu-desktop 
+    ;;
+
+"supervisor" )
+    conda activate
+    pip install supervisor
+    ;;
+
+"browser" )
+    sudo update-alternatives --config x-www-browser
+    ;;
+
+"drivers" )
+    # Epson scanner.  Yes, calling the firmware the default name
+    # "your-firmwarefile.bin" is silly.  But no matter how much editing
+    # I do to the .conf files, that is always the name it looks for.
+    cd /tmp
+    wget http://a1227.g.akamai.net/f/1227/40484/1d/download.ebz.epson.net/dsc/f/01/00/01/24/33/b6da6cc986f960ea5c21979f4262cbfd46e5d874/PER3490_WW_WIN_3041_41.exe
+    unzip PER3490_WW_WIN_3041_41.exe
+    cabextract PER3490_WW_WIN_3041_41/ModUsd.cab
+    chmod 644 Esfw52.bin
+    sudo mkdir -p /usr/share/sane/snapscan/
+    sudo cp Esfw52.bin /usr/share/sane/snapscan/your-firmwarefile.bin
+    sudo chmod -R a+rX /usr/share/sane/snapscan/
+    ;;
+
+"emacs" )
+    # make sure pyenv is available
+    ,up
+    # check out and set up ~/.emacs.d
+    if [ ! -d ~/.emacs.d ]
+    then
+	git clone git@github.com:brandon-rhodes/dot-emacs.git ~/.emacs.d ||
+	git clone https://github.com/brandon-rhodes/dot-emacs.git ~/.emacs.d
+    elif [ ! -d ~/.emacs.d/.git ]
+    then
+	echo "You seem to have an ~/.emacs.d/ of you own that is in the way"
+	exit 1
+    fi
+    cd ~/.emacs.d/
+    if [ ! -d ~/.emacs.d/init.d ]
+    then
+        ./SETUP.sh
+    fi
+    ;;
+
+"emacs-for-macos" )
+    # https://www.gnu.org/software/emacs/download.html
+    mkdir -p ~/local/src
+    cd ~/local/src
+    curl -O http://mirror.thecodefactory.org/gnu/emacs/emacs-24.5.tar.gz
+    tar xzf emacs-24.5.tar.gz
+    cd emacs-24.5
+    ./configure --prefix=$HOME/local \
+                --with-x \
+                --with-jpeg=no --with-gif=no --with-tiff=no
+    make
+    make install
+    ;;
+
+# https://download.jetbrains.com/toolbox/jetbrains-toolbox-1.22.10970.tar.gz
+"fonts" )
+    # mkdir -p ~/.fonts
+    # cd ~/.fonts
+    # # FiraCode
+    # wget https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/FiraCode/Bold/complete/Fira%20Code%20Bold%20Nerd%20Font%20Complete.ttf
+    # wget https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/FiraCode/Light/complete/Fira%20Code%20Light%20Nerd%20Font%20Complete.ttf
+    # wget https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/FiraCode/Medium/complete/Fira%20Code%20Medium%20Nerd%20Font%20Complete.ttf
+    # wget https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/FiraCode/Regular/complete/Fira%20Code%20Regular%20Nerd%20Font%20Complete.ttf
+    # wget https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/FiraCode/Retina/complete/Fira%20Code%20Retina%20Nerd%20Font%20Complete.ttf
+    # wget https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/FiraCode/SemiBold/complete/Fira%20Code%20SemiBold%20Nerd%20Font%20Complete.ttf
+    # # SourceCodePro
+    # wget https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/SourceCodePro/Regular/complete/Sauce%20Code%20Pro%20Nerd%20Font%20Complete.ttf
+    # wget https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/SourceCodePro/Bold/complete/Sauce%20Code%20Pro%20Bold%20Nerd%20Font%20Complete.ttf
+    # wget https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/SourceCodePro/Italic/complete/Sauce%20Code%20Pro%20Italic%20Nerd%20Font%20Complete.ttf
+    # wget https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/SourceCodePro/Bold-Italic/complete/Sauce%20Code%20Pro%20Bold%20Italic%20Nerd%20Font%20Complete.ttf
+    # # MesloLGS
+    # wget https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/Meslo/S/Regular/complete/Meslo%20LG%20S%20Regular%20Nerd%20Font%20Complete.ttf
+    # wget https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/Meslo/S/Bold/complete/Meslo%20LG%20S%20Bold%20Nerd%20Font%20Complete.ttf
+    # wget https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/Meslo/S/Italic/complete/Meslo%20LG%20S%20Italic%20Nerd%20Font%20Complete.ttf
+    # wget https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/Meslo/S/Bold-Italic/complete/Meslo%20LG%20S%20Bold%20Italic%20Nerd%20Font%20Complete.ttf
+
+    # wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf
+    # wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf
+    # wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf
+    # wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf
+    # wget https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/FiraCode.zip
+    # wget https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/Meslo.zip
+    # wget https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/SourceCodePro.zip
+    # unzip -o SourceCodePro.zip
+    # unzip -o FiraCode.zip
+    # unzip -o Meslo.zip
+    # rm SourceCodePro.zip FiraCode.zip Meslo.zip
+
+    # wget http://www.fontsquirrel.com/fonts/download/Crimson
+    # unzip -o Crimson
+    # rm Crimson
+    # rm SIL\ Open\ *.txt
+
+    # cd /tmp/
+    mkdir -p ~/.local/share/fonts;
+    cd ~/.local/share/fonts ;
+    extract_font FiraCode
+    extract_font Hack
+    extract_font SourceCodePro
+    extract_font Meslo
+    # ~/.local/share/fonts
+    rsync -a --progress --exclude={'Meslo LG L*Complete.ttf','Meslo LG M*Complete.ttf'} /tmp/fonts/ ~/.local/share/fonts
+    # rsync -a --progress --exclude={'Meslo LG L*Complete.ttf','Meslo LG M*Complete.ttf'} /tmp/fonts/ /tmp/
+
+    rm -rf /tmp/fonts/
+    fc-cache -f -v
+    ;;
+
+"notebook" )
+    echo "Install basic-notebook" 
+
+    echo $CONDA_PREFIX
+    eval $(echo ". ${CONDA_PREFIX}/etc/profile.d/conda.sh")
+    if [ -f "${CONDA_PREFIX}/etc/profile.d/mamba.sh" ]; then
+        . "${CONDA_PREFIX}/etc/profile.d/mamba.sh"
+    fi
+    mamba activate base
+    # mamba create --quiet --yes -n notebook python=3.8
+    mamba create -y -p ~/mans_is/opt/ipynb python=3.8 
+    # ${CONDA_PREFIX}/bin/conda create -y -p ~/opt/ipynb python=3.8
+    mamba activate ~/mans_is/opt/ipynb
+    echo $CONDA_PREFIX
+    mamba install --quiet --yes \
+        'notebook' \
+        'jupyterhub' \
+        'jupyterlab' \
+        'jupyterlab-git' \
+        'jupyterlab_code_formatter' \
+        'bqplot' \
+        'pandas-profiling' \
+        'panel' \
+        'ipyleaflet' \
+        'ipympl' \
+        'pythreejs' \
+        'ipycytoscape' \
+        'evidently' \
+        'jupytext' \
+        'voila' \
+        'nikola' \
+        'nbdime' \
+        'nodejs=14.*' \
+        'ipyparallel' \
+        'nbformat=5.1.*' \
+        'fastai::nbdev' \
+        'nbclient' \
+        'nbqa' \
+        'dask-sql' \
+        'dask-labextension' \
+        'jupyterlab-system-monitor' \
+        'jupyterlab-lsp' \
+        'jupyter-lsp' \
+        'jupyter-lsp-python' \
+        'jupyter-lsp-r' \
+        'python-lsp-server' \
+        'r-languageserver'
+    # nikola nbdime ipyparallel nbformat nbdev nbclient  nbqa
+    # : 1645034514:0;poetry add pandas-profiling panel bqplot ipyleaflet ipympl pythreejs ipycytoscape raiwidgets evidently jupyter-resource-usage mamba-gator  jupyter-tabnine jupyter_http_over_ws jupytext voila nikola nbdime ipyparallel nbformat nbdev nbclient  nbqa
+    ln -sf $CONDA_PREFIX/bin/jupyter ~/.local/bin/jupyter
+    # mamba clean --all -f -y 
+    npm cache clean --force
+    # jupyter notebook --generate-config
+    # cp ./resources/jupyter_server_config.py  $HOME/.jupyter/jupyter_notebook_config.py 
+
+    lab_ext_install='jupyter labextension install -y --debug-log-path=/tmp/jupyter-install.log --log-level=WARN --minimize=False --no-build'
+    lab_ext_build='jupyter lab build --dev-build=False -y --debug-log-path=/tmp/jupyte-build.log --log-level=WARN'
+
+    # Create empty notebook configuration
+    mkdir -p $HOME/.jupyter/nbconfig/ 
+    printf "{\"load_extensions\": {}}" > $HOME/.jupyter/nbconfig/notebook.json 
+    # Activate and configure extensions
+    # jupyter contrib nbextension install --sys-prefix
+    # nbextensions configurator
+    # 
+    # Configure nbdime
+    nbdime config-git --enable --global
+    # Activate Jupytext
+    jupyter nbextension enable --py jupytext --sys-prefix
+    # eval $lab_ext_install jupyterlab-skip-traceback
+    # Enable useful extensions
+    #jupyter nbextension enable skip-traceback/main --sys-prefix
+    # jupyter nbextension enable comment-uncomment/main && \
+    # jupyter nbextension enable toc2/main --sys-prefix
+    # jupyter nbextension enable execute_time/ExecuteTime --sys-prefix
+    # jupyter nbextension enable collapsible_headings/main --sys-prefix
+    # jupyter nbextension enable codefolding/main --sys-prefix 
+    # Disable pydeck extension, cannot be loaded (404)
+    # jupyter nbextension disable pydeck/extension
+    # Install and activate Jupyter Tensorboard
+    # pip install --no-cache-dir git+https://github.com/InfuseAI/jupyter_tensorboard.git
+    # jupyter tensorboard enable --sys-prefix && \
+    # TODO moved to configuration files = resources/jupyter/nbconfig Edit notebook config
+    # echo '{"nbext_hide_incompat": false}' > $HOME/.jupyter/nbconfig/common.json && \
+    # cat $HOME/.jupyter/nbconfig/notebook.json | jq '.toc2={"moveMenuLeft": false,"widenNotebook": false,"skip_h1_title": false,"sideBar": true,"number_sections": false,"collapse_to_match_collapsible_headings": true}' > tmp.$$.json && mv tmp.$$.json $HOME/.jupyter/nbconfig/notebook.json && \
+    # If minimal flavor - exit here
+    if [ "$WORKSPACE_FLAVOR" = "minimal" ]; then \
+        # Cleanup
+        clean-layer.sh 
+        exit 0 ; \
+    fi 
+    # TODO: Not installed. Disable Jupyter Server Proxy
+    # jupyter nbextension disable jupyter_server_proxy/tree --sys-prefix && \
+    # Install jupyter black
+    # If light flavor - exit here
+    if [ "$WORKSPACE_FLAVOR" = "light" ]; then \
+        # Cleanup
+        clean-layer.sh
+        exit 0 ; \
+    fi
+
+    # Activate qgrid
+    # jupyter nbextension enable --py --sys-prefix qgrid
+    # TODO: Activate Colab support
+    # jupyter serverextension enable --py jupyter_http_over_ws && \
+    # Activate Voila Rendering
+    # currently not working jupyter serverextension enable voila --sys-prefix && \
+    # Enable ipclusters
+    # ipcluster nbextension enable 
+    jupyter lab build --dev-build=False --minimize=False
+
+    eval $lab_ext_install @jupyter-widgets/jupyterlab-manager
+    eval $lab_ext_install plotlywidget
+    eval $lab_ext_install jupyterlab-chart-editor
+    eval $lab_ext_install \
+        @jupyterlab/celltags \
+        @jupyterlab/debugger \
+        @jupyterlab/debugger \
+        @jupyterlab/translation\
+        @jupyterlab/translation-extension \
+        @jupyterlab/hdf5 \
+        @jupyterlab/geojson-extension \
+        @jupyterlab/latex \
+        @jupyterlab/fasta-extension \
+        @jupyterlab/geojson-extension \
+        @jupyterlab/katex-extension \
+        @jupyterlab/mathjax3-extension \
+        @jupyterlab/vega2-extension \
+        @jupyterlab/vega3-extension \
+        @jupyterlab/celltags-extension \
+        @jupyterlab/plugin-playground
+    # jupyter lab build --dev-build=False --minimize=False
+    eval $lab_ext_build
+    jupyter lab clean
+    rm -rf "${HOME}/.cache/yarn" 
+    ;;
+
+"minimal-notebook" )
+    echo "Install minimal-notebook" 
+    echo "current dir:" $PWD
+    echo $CONDA_PREFIX
+    eval $(echo ". ${CONDA_PREFIX}/etc/profile.d/conda.sh")
+    if [ -f "${CONDA_PREFIX}/etc/profile.d/mamba.sh" ]; then
+        . "${CONDA_PREFIX}/etc/profile.d/mamba.sh"
+    fi
+    mamba activate ~/mans_is/opt/ipynb
+    mamba install --quiet --yes \
+        'git' \
+        'nano' \
+        'tzdata' \
+        'unzip' \
+        'vim' \
+        'graphicsmagick' \
+        'imagemagick' \
+        'openssh' \
+        'texlive-core' 
+        # Inkscape is installed to be able to convert SVG files 
+        # inkscape
+        # git-over-ssh
+        # openssh \
+        # less is needed to run help in R
+        # see: https://github.com/jupyter/docker-stacks/issues/1588
+        # less \
+        # m2-less \
+        # nbconvert dependencies
+        # https://nbconvert.readthedocs.io/en/latest/install.html#installing-tex
+        # texlive-xetex \
+        # texlive-fonts-recommended \
+        # texlive-plain-generic
+        # 'texlive-core' 
+
+
+    # mamba clean --all -f -y 
+    npm cache clean --force
+    jupyter lab clean
+    rm -rf "${HOME}/.cache/yarn" 
+
+    ;;
+
+"scipy-notebook" )
+    echo "Install scipy-notebook" 
+    cd
+    echo $CONDA_PREFIX
+    eval $(echo ". ${CONDA_PREFIX}/etc/profile.d/conda.sh")
+    if [ -f "${CONDA_PREFIX}/etc/profile.d/mamba.sh" ]; then
+        . "${CONDA_PREFIX}/etc/profile.d/mamba.sh"
+    fi
+    mamba activate ~/mans_is/opt/ipynb
+    # conda install  -y --update-all mkl-service mkl
+    mamba install --quiet --yes \
+        'ffmpeg' \
+        'altair' \
+        'beautifulsoup4' \
+        'bokeh' \
+        'bottleneck' \
+        'cloudpickle' \
+        'conda-forge::blas=*=openblas' \
+        'cython' \
+        'dask' \
+        'dill' \
+        'h5py' \
+        'ipympl'\
+        'ipywidgets' \
+        'matplotlib-base' \
+        'numba' \
+        'numexpr' \
+        'pandas' \
+        'patsy' \
+        'protobuf' \
+        'pytables' \
+        'scikit-image' \
+        'scikit-learn' \
+        'scipy' \
+        'seaborn' \
+        'sqlalchemy' \
+        'statsmodels' \
+        'sympy' \
+        'widgetsnbextension'\
+        'xlrd'
+
+    # mamba clean --all -f -y 
+    python -c "import matplotlib.pyplot" 
+    ;;
+
+"datascience-notebook" )
+    echo "Install datascience-notebook"
+    echo "current dir:" $PWD
+    echo $CONDA_PREFIX
+    eval $(echo ". ${CONDA_PREFIX}/etc/profile.d/conda.sh")
+    if [ -f "${CONDA_PREFIX}/etc/profile.d/mamba.sh" ]; then
+        . "${CONDA_PREFIX}/etc/profile.d/mamba.sh"
+    fi
+    julia_version="1.7.2"
+    mamba activate ~/mans_is/opt/ipynb
+    mamba install --quiet --yes \
+        julia==${julia_version}
+
+    # R packages including IRKernel which gets installed globally.
+    # r-e1071: dependency of the caret R package
+    mamba install --quiet --yes \
+        'r-base' \
+        'r-caret' \
+        'r-crayon' \
+        'r-devtools' \
+        'r-e1071' \
+        'r-forecast' \
+        'r-hexbin' \
+        'r-htmltools' \
+        'r-htmlwidgets' \
+        'r-irkernel' \
+        'r-nycflights13' \
+        'r-randomforest' \
+        'r-rcurl' \
+        'r-rodbc' \
+        'r-rsqlite' \
+        'r-shiny' \
+        'rpy2' \
+        'unixodbc'
+    mamba clean --all -f -y
+
+    # These packages are not easy to install under arm
+    arch=$(uname -m) && \
+    if [ "${arch}" == "x86_64" ]; then \
+        mamba install --quiet --yes \
+            'r-rmarkdown' \
+            'r-tidymodels' \
+            'r-tidyverse' && \
+            mamba clean --all -f -y
+            # fix-permissions "${CONDA_DIR}" && \
+            # fix-permissions "/home/${NB_USER}"; \
+    fi;
+    # Add Julia packages.
+    # Install IJulia as jovyan and then move the kernelspec out
+    # to the system share location. Avoids problems with runtime UID change not
+    # taking effect properly on the .local folder in the jovyan home dir.
+    julia -e 'import Pkg; Pkg.update()'
+    julia -e 'import Pkg; Pkg.add("HDF5")'
+    julia -e 'using Pkg; pkg"add IJulia"; pkg"precompile"' 
+    # move kernelspec out of home \
+    # mv "${HOME}/.local/share/jupyter/kernels/julia"* "${CONDA_PREFIX}/share/jupyter/kernels/" 
+    ;;
+
+"geospatial-notebook" )
+    echo "Install geospatial-notebook" 
+    cd
+    echo $CONDA_PREFIX
+    eval $(echo ". ${CONDA_PREFIX}/etc/profile.d/conda.sh")
+    if [ -f "${CONDA_PREFIX}/etc/profile.d/mamba.sh" ]; then
+        . "${CONDA_PREFIX}/etc/profile.d/mamba.sh"
+    fi
+    mamba activate ~/mans_is/opt/ipynb
+    mamba install --quiet --yes \
+        'gdal' \
+        'pdal' \
+        'pyproj' \
+        'richdem' \
+        'rasterio' \
+        'xarray' \
+        'zarr' \
+        'rioxarray' \
+        'netcdf4' \
+        'h5netcdf' \
+        'astropy' \
+        'pyroSAR' \
+        'pygmt' \
+        'geopandas' \
+        'cartopy' \
+        'dask-geopandas' \
+        'eoreader' \
+        'fiona' \
+        'shapely' \
+        'leafmap' \
+        'leafmaptools'
+
+    # mamba clean --all -f -y 
+    ;;
+
+"ml-notebook" )
+    echo "Install geospatial-notebook" 
+    cd
+    echo $CONDA_PREFIX
+    eval $(echo ". ${CONDA_PREFIX}/etc/profile.d/conda.sh")
+    if [ -f "${CONDA_PREFIX}/etc/profile.d/mamba.sh" ]; then
+        . "${CONDA_PREFIX}/etc/profile.d/mamba.sh"
+    fi
+
+    mamba activate ~/mans_is/opt/ipynb
+
+    if which nvidia-smi >/dev/null; then
+        echo GPU exists
+        mamba install --quiet --yes \
+            'pytorch' 'torchvision' 'torchaudio' \
+            'cudatoolkit=11.3' \
+            'conda-forge:cudnn=8.1.*' \
+            'nvidia:cuda-nvcc' \
+            'nvidia:cuda-command-line-tools' \
+            'nvidia:cuda-tools' \
+            'nvidia:cuda-visual-tools' -c pytorch -c conda-forge -c nvidia
+
+        pip install --no-cache-dir tensorflow 
+        pip install --no-cache-dir \
+            tensorflow-datasets \
+            tensorflow-addons \
+            tensorflow-model-optimization \
+            tensorflow-transform \
+            tensorflow-io \
+            tensorflow-compression \
+            tensorboard \
+            tensorboardX
+        
+    else
+        echo GPU does not exist
+        mamba install --quiet --yes \
+            'pytorch' 'torchvision' 'torchaudio' 'cpuonly' -c pytorch
+
+        mamba install --quiet --yes \
+            'gdal' \
+            'pdal' \
+            'pyproj' \
+            'richdem' \
+            'rasterio' \
+            'xarray' \
+            'zarr' \
+            'rioxarray' \
+            'netcdf4' \
+            'h5netcdf' \
+            'astropy' \
+            'pyroSAR' \
+            'pygmt' \
+            'geopandas' \
+            'cartopy' \
+            'dask-geopandas' \
+            'eoreader' \
+            'fiona' \
+            'shapely' \
+            'leafmap' \
+            'leafmaptools'
+    fi
+
+
+    # Install and activate what if tool
+    pip install --no-cache-dir witwidget
+    jupyter nbextension install --py --symlink --sys-prefix witwidget
+    jupyter nbextension enable --py --sys-prefix witwidget
+
+    pip install git+https://github.com/cliffwoolley/jupyter_tensorboard.git
+    pip install git+https://github.com/chaoleili/jupyterlab_tensorboard.git
+
+    mamba clean --all -f -y 
+    ;;
+
+"all-notebook" )
+    setup notebook
+    setup minimal-notebook
+    setup scipy-notebook
+    setup datascience-notebook
+    setup geospatial-notebook
+    setup ml-notebook
+    ;;
+
+"snap" )
+    cd
+    conda create --force -y --name snap python=3.6 openjdk
+    #conda activate snap
+    mkdir -p /tmp/snap
+    cd /tmp/snap
+    wget https://download.esa.int/step/snap/8.0/installers/esa-snap_all_unix_8_0.sh
+    chmod +x esa-snap_*.sh
+    ./esa-snap_*.sh -q
+    ln -s $HOME/snap/bin/gpt $HOME/.local/bin/ 
+    sed -i -e 's/-Xmx1G/-Xmx4G/g' $HOME/snap/bin/gpt.vmoptions
+    rm -rf esa-snap_*.sh
+    ;;
+
+"qgis" )
+    echo "Install basic-notebook" 
+
+    echo $CONDA_PREFIX
+    eval $(echo ". ${CONDA_PREFIX}/etc/profile.d/conda.sh")
+    if [ -f "${CONDA_PREFIX}/etc/profile.d/mamba.sh" ]; then
+        . "${CONDA_PREFIX}/etc/profile.d/mamba.sh"
+    fi
+    mamba activate base
+    # mamba create --quiet --yes -n notebook python=3.8
+    mamba create -y -p ~/mans_is/opt/qgis python qgis
+    ;;
+
+"jupyter" )
+    cd
+    # Install Jupyter Notebook, Lab, and Hub
+    # Generate a notebook server config
+    # Cleanup temporary files
+    # Correct permissions
+    # Do all this in a single RUN command to avoid duplicating all of the
+    # files across image layers when the permissions change  --quiet
+    $CONDA_DIR/bin/conda create -f --yes -p ~/local/ipynb \
+    'python=3.8' \
+    'notebook=6.4.0' \
+    'jupyterhub=1.4.1' \
+    'jupyterlab=3.0.16' \
+    'beautifulsoup4=4.9.*' \
+    'conda-forge::blas=*=openblas' \
+    'bokeh=2.3.*' \
+    'bottleneck=1.3.*' \
+    'cloudpickle=1.6.*' \
+    'cython=0.29.*' \
+    'dask=2021.3.*' \
+    'dill=0.3.*' \
+    'h5py=3.1.*' \
+    'ipywidgets=7.6.*' \
+    'ipympl=0.6.*'\
+    'matplotlib-base=3.3.*' \
+    'numba=0.53.*' \
+    'numexpr=2.7.*' \
+    'pandas=1.2.*' \
+    'patsy=0.5.*' \
+    'protobuf=3.15.*' \
+    'pytables=3.6.*' \
+    'scikit-image=0.18.*' \
+    'scikit-learn=0.24.*' \
+    'scipy=1.6.*' \
+    'seaborn=0.11.*' \
+    'sqlalchemy=1.4.*' \
+    'statsmodels=0.12.*' \
+    'sympy=1.7.*' \
+    'vincent=0.4.*' \
+    'widgetsnbextension=3.5.*'\
+    'xlrd=2.0.*'
+    $CONDA_DIR/bin/conda clean --all -f -y
+    npm cache clean --force
+    #jupyter notebook --generate-config
+    $CONDA_DIR/bin/conda activate ipynb
+    # Jupyter Dash https://github.com/plotly/jupyter-dash
+    conda install -y -c conda-forge jupyter_bokeh nbdime plotly jupyter-dash dask-labextension jupyterlab-drawio jupyter-server-proxy jlab-enhanced-cell-toolbar
+    # install Jupyter Renderers https://github.com/jupyterlab/jupyter-renderers
+    pip install --no-cache-dir jupyterlab-fasta jupyterlab-geojson  jupyterlab-katex jupyterlab-mathjax3  jupyterlab-vega2 jupyterlab-vega3
+    # 
+    pip install --no-cache-dir --upgrade jupyterlab-git xeus-python
+    # Build jupyter lab
+    jupyter lab build 
+    jupyter lab clean
+    rm -rf /home/$USER/.cache/yarn
+    cd /tmp && git clone https://github.com/PAIR-code/facets.git
+    jupyter nbextension install facets/facets-dist/ --sys-prefix
+    rm -rf /tmp/facets
+    ;;
+
+"ml-gpu" )
+    cd
+    ENV_NAME=ml-gpu
+    # Install Jupyter Notebook, Lab, and Hub
+    # Generate a notebook server config
+    # Cleanup temporary files
+    # Correct permissions
+    # Do all this in a single RUN command to avoid duplicating all of the
+    # files across image layers when the permissions change  --quiet
+    $CONDA_DIR/bin/conda create -f --yes -n $ENV_NAME \
+    'python=3.8' \
+    'pip' \
+    'altair=4.1.*' \
+    'beautifulsoup4=4.9.*' \
+    'bokeh=2.3.*' \
+    'bottleneck=1.3.*' \
+    'cloudpickle=1.6.*' \
+    'conda-forge::blas=*=openblas' \
+    'cython=0.29.*' \
+    'dask=2021.6.*' \
+    'dill=0.3.*' \
+    'h5py=3.2.*' \
+    'ipympl=0.7.*'\
+    'ipywidgets=7.6.*' \
+    'matplotlib-base=3.4.*' \
+    'numba=0.53.*' \
+    'numexpr=2.7.*' \
+    'pandas=1.2.*' \
+    'patsy=0.5.*' \
+    'protobuf=3.17.*' \
+    'pytables=3.6.*' \
+    'scikit-image=0.18.*' \
+    'scikit-learn=0.24.*' \
+    'scipy=1.6.*' \
+    'seaborn=0.11.*' \
+    'sqlalchemy=1.4.*' \
+    'statsmodels=0.12.*' \
+    'sympy=1.8.*' \
+    'widgetsnbextension=3.5.*'\
+    'xlrd=2.0.*' 
+    # $CONDA_DIR/bin/conda clean --all -f -y
+    # npm cache clean --force
+    #jupyter notebook --generate-config
+    source $CONDA_DIR/bin/activate
+    conda activate $ENV_NAME
+    echo  "$(which python)" 
+    # Install libraries for Geoprocessing (Geospatial, LiDAR, ) GDAL, GEOS, PDAL
+    conda install  -y  -c conda-forge cmake pdal python-pdal gdal entwine geopandas rasterio xarray rioxarray netcdf4 h5netcdf gmt pygmt cartopy
+    # Install libraries for plot and maps
+    pip install --no-cache-dir ipyleaflet
+    # Not needed? Install cuda-toolkit (e.g. for pytorch: https://pytorch.org/): https://anaconda.org/anaconda/cudatoolkit
+    conda install -y cudatoolkit=10.1 -c pytorch 
+    conda install -y cudatoolkit=11.2 # -c pytorch 
+    # Install cupy: https://cupy.chainer.org/
+    pip install --no-cache-dir cupy-cuda101
+    # Install pycuda: https://pypi.org/project/pycuda
+    pip install --no-cache-dir pycuda
+    # Install gpu utils libs
+    pip install --no-cache-dir gpustat py3nvml gputil
+    # Install scikit-cuda: https://scikit-cuda.readthedocs.io/en/latest/install.html
+    pip install --no-cache-dir scikit-cuda
+    # Install tensorflow gpu
+    # TODO: tensorflow 2.3.1 installs tenorboard 2.4.0 with problems, use 2.3.0
+    pip install --no-cache-dir tensorflow-gpu==2.5.0
+    # Install ONNX GPU Runtime
+    # TODO: 1.4.x is latest with cuda 10.1 support
+    pip install --no-cache-dir onnxruntime-gpu==1.8.0
+    # Install pytorch gpu
+    # https://pytorch.org/get-started/locally/
+    conda install -y pytorch -c pytorch
+    # Install faiss gpu
+    conda install -y faiss-gpu -c pytorch
+    # Update mxnet to gpu edition
+    pip install --no-cache-dir mxnet-cu101mkl==1.6.0.post0
+    # install jax: https://github.com/google/jax#pip-installation
+    pip install --no-cache-dir --upgrade jax jaxlib==0.1.57+cuda101 -f https://storage.googleapis.com/jax-releases/jax_releases.html 
+    # Install pygpu - Required for theano: http://deeplearning.net/software/libgpuarray/
+    conda install -y pygpu
+    # Install lightgbm
+    pip install --no-cache-dir lightgbm --install-option=--gpu # --install-option="--opencl-include-dir=/usr/local/cuda/include/" --install-option="--opencl-library=/usr/local/cuda/lib64/libOpenCL.so" 
+    # nvidia python ml lib
+    pip install --no-cache-dir --upgrade --force-reinstall nvidia-ml-py3
+    # SpeedTorch: https://github.com/Santosh-Gupta/SpeedTorch
+    pip install --no-cache-dir SpeedTorch
+    # Ipyexperiments - fix memory leaks
+    pip install --no-cache-dir ipyexperiments
+    python -m ipykernel install --user --name $ENV_NAME --display-name $ENV_NAME
+    ;;
+
+"juila" )
+    cd
+    julia_version="1.5.4"
+    # SHA256 checksum
+    julia_checksum="80dec351d1a593e8ad152636971a48d0c81bfcfab92c87f3604663616f1e8bc5"
+
+    # R pre-requisites
+    apt-get update
+    apt-get install -y --no-install-recommends \
+    fonts-dejavu \
+    gfortran \
+    gcc 
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+    # Julia dependencies
+    # install Julia packages in /opt/julia instead of $HOME
+    JULIA_DEPOT_PATH=/opt/julia
+    JULIA_PKGDIR=/opt/julia
+    JULIA_VERSION="${julia_version}"
+
+    cd /tmp
+
+    # hadolint ignore=SC2046
+    mkdir "/opt/julia-${JULIA_VERSION}"
+    wget -q https://julialang-s3.julialang.org/bin/linux/x64/$(echo "${JULIA_VERSION}" | cut -d. -f 1,2)"/julia-${JULIA_VERSION}-linux-x86_64.tar.gz"
+    echo "${julia_checksum} *julia-${JULIA_VERSION}-linux-x86_64.tar.gz" | sha256sum -c -
+    tar xzf "julia-${JULIA_VERSION}-linux-x86_64.tar.gz" -C "/opt/julia-${JULIA_VERSION}" --strip-components=1
+    rm "/tmp/julia-${JULIA_VERSION}-linux-x86_64.tar.gz"
+    ln -fs /opt/julia-*/bin/julia /usr/local/bin/julia
+
+    # Show Julia where conda libraries are \
+    mkdir /etc/julia
+    echo "push!(Libdl.DL_LOAD_PATH, \"$CONDA_DIR/lib\")" >> /etc/julia/juliarc.jl
+    # Create JULIA_PKGDIR \
+    mkdir "${JULIA_PKGDIR}"
+    chown "${USER}" "${JULIA_PKGDIR}"
+    fix-permissions "${JULIA_PKGDIR}"
+
+
+    ;;
+
+
+"r-package" )
+    cd
+    $CONDA_DIR/bin/conda install -n ipynb --quiet --yes \
+    'r-base=4.0.3'  \
+    'r-caret=6.0*' \
+    'r-crayon=1.4*' \
+    'r-devtools=2.3*' \
+    'r-forecast=8.14*' \ 
+    'r-hexbin=1.28*' \
+    'r-htmltools=0.5*' \
+    'r-htmlwidgets=1.5*' \ 
+    'r-irkernel=1.1*' \
+    'r-nycflights13=1.0*' \
+    'r-randomforest=4.6*' \
+    'r-rcurl=1.98*' \
+    'r-rmarkdown=2.7*' \
+    'r-rsqlite=2.2*' \
+    'r-shiny=1.6*' \
+    'r-tidyverse=1.3*' \
+    'rpy2=3.4*'
+    $CONDA_DIR/bin clean --all -f -y
+    
+    ;;
+
+"ml" )
+    cd
+    .anaconda/bin/conda create -y -p ~/local/ipynb \
+                        python=3.8 jupyter pandas seaborn
+    ;;
+
+"xephem" )
+    sudo apt-get install libxext-dev libxmu-dev libxp-dev libxt-dev \
+        x11proto-print-dev
+    cd ~/local/src
+    wget -c http://97.74.56.125/free/xephem-3.7.6.tar.gz
+    tar xvfz xephem-3.7.6.tar.gz
+    cd xephem-3.7.6/GUI/xephem
+    make MOTIF=../../libXm/linux86
+    cd ~/bin
+    ln -s ../local/src/xephem-3.7.6/GUI/xephem/xephem .
+    cd ~
+    if [ ! -d .xephem ] ;then
+        mkdir .xephem
+        echo "XEphem.ShareDir: $HOME/local/src/xephem-3.7.6/GUI/xephem" \
+            > .xephem/XEphem
+    fi
+    ;;
+
+* )
+    cat >&2 <<EOF
+echo usage: ,setup THING
+
+where THING is one of:
+
+$(echo $(pcregrep -o1 '^"([^"]+)' "$0"))
+EOF
+    ;;
+
+esac

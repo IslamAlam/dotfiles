@@ -5,6 +5,10 @@ timezsh() {
   for i in $(seq 1 10); do /usr/bin/time $shell -i -c exit; done
 }
 
+# Source bash_aliases
+if [ -f  ${HOME}/.bash_aliases ]; then
+  source ${HOME}/.bash_aliases
+fi
 
 
 # Powerlevel10k
