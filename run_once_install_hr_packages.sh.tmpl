@@ -1,0 +1,55 @@
+#!/bin/bash
+{{ if eq .chezmoi.os "linux" -}}
+
+{{ if eq "hr" ( .chezmoi.hostname | replaceAllRegex "-slx.*" "" ) }}
+
+########## Install conda with mamba
+echo "##### Install conda "
+CONDA_DIR="${HOME}/.conda"
+PATH=${CONDA_DIR}/bin:${PATH}
+
+
+cd /tmp
+wget "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"
+# bash Mambaforge-$(uname)-$(uname -m).sh -b --force -p $CONDA_DIR
+bash Mambaforge-$(uname)-$(uname -m).sh -b -p $CONDA_DIR
+
+conda config --system --set auto_update_conda true 
+conda config --system --set show_channel_urls true 
+
+echo "Update conda"
+mamba update --all --quiet --yes 
+echo "Install essential packages"
+mamba install --quiet --yes \
+	'pip' \
+	'tini=0.19.0' \
+	'yarn' \
+	'nodejs' \
+	'wget' \
+	'curl' \
+	'zsh' \
+	'git' \
+	'gitpython' \
+	'go' \
+	'gnupg' \
+	'git-lfs' \
+	'rust'
+# conda list tini | grep tini | tr -s ' ' | cut -d ' ' -f 1,2 >> $CONDA_DIR/conda-meta/pinned 
+conda clean --all -f -y 
+rm -rf $HOME/.cache/yarn 
+
+
+# Install Age
+echo "Installing Age"
+AGE_VERSION=$(curl -s "https://api.github.com/repos/FiloSottile/age/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+
+curl -Lo /tmp/age.tar.gz "https://github.com/FiloSottile/age/releases/latest/download/age-v${AGE_VERSION}-linux-amd64.tar.gz"
+mkdir -p /tmp/age/ ${HOME}/.local/bin/
+tar -xzf /tmp/age.tar.gz --strip-components=1 -C /tmp/age/
+mv /tmp/age/ag* ${HOME}/.local/bin/
+rm -rf /tmp/age*
+
+
+{{ end }}
+
+{{ end }}

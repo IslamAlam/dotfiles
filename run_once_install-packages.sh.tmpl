@@ -22,6 +22,7 @@ sudo apt install --yes \
     ripgrep \
     software-properties-common \
     curl \
+	age \
     jq \
     build-essential 
 
@@ -69,15 +70,14 @@ bash Mambaforge-$(uname)-$(uname -m).sh -b -p $CONDA_DIR
 
 {{ end -}}
 
-git clone https://github.com/gpakosz/.tmux.git ~/.tmux
-ln -fs ~/.tmux/.tmux.conf ~/.tmux.conf
 
-{{ else if eq .chezmoi.os "darwin" -}}
-#!/bin/sh
-brew install ripgrep
+# {{ else if eq .chezmoi.os "darwin" -}}
+# {{ else if eq "hr" ( .chezmoi.hostname | replaceAllRegex "-slx.*" "" ) }}
 
-git clone https://github.com/gpakosz/.tmux.git ~/.tmux.git
-ln -fs ~/.tmux/.tmux.conf ~/.tmux.conf
+# #!/bin/sh
+# brew install ripgrep
+
+
 {{ end -}}
 
 # Setup for GPG
