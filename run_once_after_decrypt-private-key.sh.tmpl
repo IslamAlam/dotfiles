@@ -14,8 +14,10 @@ else
 	tar -xzf /tmp/age.tar.gz --strip-components=1 -C /tmp/age/
 	mv /tmp/age/ag* ${HOME}/.local/bin/
 	rm -rf /tmp/age*
-	PATH=${HOME}/.local/bin:${PATH}
+	export PATH=${HOME}/.local/bin:${PATH}
 fi
+
+export PATH=${HOME}/.local/bin:${PATH}
 
 if [ ! -f "${HOME}/.age/key.txt" ]; then
 	mkdir -p ${HOME}/.age/
