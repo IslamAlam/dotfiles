@@ -2,9 +2,9 @@
 
 set -eu
 
-# {{ if eq .chezmoi.os "linux" -}}
+{{ if eq .chezmoi.os "linux" -}}
 
-# {{ if eq "hr" ( .chezmoi.hostname | replaceAllRegex "-slx.*" "" ) }}
+{{ if eq "hr" ( .chezmoi.hostname | replaceAllRegex "-slx.*" "" ) }}
 
 ########## Install conda with mamba
 echo "##### Install conda "
@@ -55,6 +55,6 @@ PATH=${HOME}/.local/bin:${PATH}
 
 
 
-# {{ end }}
+{{ end }}
 
-# {{ end }}
+{{ end }}

@@ -1,12 +1,24 @@
 #!/bin/sh
 
-
 if which age >/dev/null; then
-	if [ ! -f "${HOME}/.age/key.txt" ]; then
-		mkdir -p ${HOME}/.age/
-		age --decrypt --output "${HOME}/.age/key.txt" "{{ .chezmoi.sourceDir }}/key.txt.age"
-		chmod 600 "${HOME}/.age/key.txt"
-	fi
+
+	echo "Age is installed"
+
 else
-    echo age app not exist
+	# Install Age
+	echo "Installing Age"
+	AGE_VERSION=$(curl -s "https://api.github.com/repos/FiloSottile/age/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+
+	curl -Lo /tmp/age.tar.gz "https://github.com/FiloSottile/age/releases/latest/download/age-v${AGE_VERSION}-linux-amd64.tar.gz"
+	mkdir -p /tmp/age/ ${HOME}/.local/bin/
+	tar -xzf /tmp/age.tar.gz --strip-components=1 -C /tmp/age/
+	mv /tmp/age/ag* ${HOME}/.local/bin/
+	rm -rf /tmp/age*
+	PATH=${HOME}/.local/bin:${PATH}
+fi
+
+if [ ! -f "${HOME}/.age/key.txt" ]; then
+	mkdir -p ${HOME}/.age/
+	age --decrypt --output "${HOME}/.age/key.txt" "{{ .chezmoi.sourceDir }}/key.txt.age"
+	chmod 600 "${HOME}/.age/key.txt"
 fi
