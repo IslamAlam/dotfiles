@@ -1,8 +1,12 @@
 #!/bin/sh
 
 
-if [ ! -f "${HOME}/.age/key.txt" ]; then
-    mkdir -p ${HOME}/.age/
-    age --decrypt --output "${HOME}/.age/key.txt" "{{ .chezmoi.sourceDir }}/key.txt.age"
-    chmod 600 "${HOME}/.age/key.txt"
+if which age >/dev/null; then
+	if [ ! -f "${HOME}/.age/key.txt" ]; then
+		mkdir -p ${HOME}/.age/
+		age --decrypt --output "${HOME}/.age/key.txt" "{{ .chezmoi.sourceDir }}/key.txt.age"
+		chmod 600 "${HOME}/.age/key.txt"
+	fi
+else
+    echo age app not exist
 fi
