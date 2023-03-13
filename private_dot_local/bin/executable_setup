@@ -426,6 +426,16 @@ case "$1" in
     fetch   "https://sourceforge.net/projects/turbovnc/files/${turboVNC_ver}/turbovnc_${turboVNC_ver}_$ARCH.deb/download" \
         "$CACHE_DIR/turbovnc_${turboVNC_ver}_$ARCH.deb"
 
+    fetch   "https://github.com/novnc/noVNC/archive/v${NOVNC_VERSION}.tar.gz" \
+        "$CACHE_DIR/novnc-install.tar.gz"
+
+    fetch   "https://github.com/novnc/websockify/archive/v${WEBSOCKETIFY_VERSION}.tar.gz" \
+        "$CACHE_DIR/websockify-install.tar.gz"
+
+	# curl -sSL https://github.com/novnc/noVNC/archive/v${NOVNC_VERSION}.tar.gz -o $CACHE_DIR/novnc-install.tar.gz
+	# curl -sSL https://github.com/novnc/websockify/archive/v${WEBSOCKETIFY_VERSION}.tar.gz -o $CACHE_DIR/websockify-install.tar.gz
+
+
     if is_user_root; then
         echo 'You are the almighty root!'
         # You can do whatever you need...
