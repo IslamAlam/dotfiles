@@ -65,7 +65,7 @@ sudo mkdir -p ${CONDA_DIR}
 cd /tmp
 wget "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"
 # bash Mambaforge-$(uname)-$(uname -m).sh -b --force -p $CONDA_DIR
-bash Mambaforge-$(uname)-$(uname -m).sh -b -p $CONDA_DIR
+bash Mambaforge-$(uname)-$(uname -m).sh -b -f -p $CONDA_DIR
 
 
 {{ end -}}
