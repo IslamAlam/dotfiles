@@ -36,7 +36,7 @@ extract_font(){
     echo "Nerd Fonts: ${NERD_FONT_VERSION}"
 
     curl -fLo /tmp/font-${FONT_NAME}.zip https://github.com/ryanoasis/nerd-fonts/releases/download/v${NERD_FONT_VERSION}/${FONT_NAME}.zip;
-	unzip -o -C /tmp/font-${FONT_NAME}.zip "**omplete.ttf" -d /tmp/fonts; 
+	unzip -o -C /tmp/font-${FONT_NAME}.zip "**.ttf" -d /tmp/fonts; 
     }
 
 	# unzip -o -C /tmp/Font-${FONT_NAME}.zip "**omplete.ttf" -d /usr/share/fonts; }
