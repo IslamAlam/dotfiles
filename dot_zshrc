@@ -14,7 +14,7 @@ autoload -Uz _zinit
 ### End of Zinit's installer chunk
 
 # Self update
-zinit self-update
+# zinit self-update
 
 # Plugin update
 # zinit update --all --parallel
@@ -32,10 +32,7 @@ zinit for \
   zdharma-continuum/zinit-annex-bin-gem-node \
   zdharma-continuum/zinit-annex-patch-dl \
   zdharma-continuum/zinit-annex-rust \
-    light-mode \
-    pick"async.zsh" \
-    src"pure.zsh" \
-  sindresorhus/pure
+
 
 
 #==============================================================#
@@ -317,19 +314,37 @@ fi
 # dot files backup
 if ! builtin command -v chezmoi > /dev/null 2>&1; then
   zinit wait'1' lucid \
-    from"gh-r" as"program" mv'chezmoi* -> chezmoi' \
+    from"gh-r" as"program" mv'chezmoi* -> chezmoi' pick'chezmoi' \
     light-mode for @twpayne/chezmoi
 fi
 
 # neovim
+# zinit wait'0' lucid nocompletions \
+# 	from'gh-r' ver'nightly' as'program' bpick'*tar.gz' \
+# 	pick'nvim*/bin/*' \
+# 	atclone"echo "" > ._zinit/is_release" \
+# 	atpull'%atclone' \
+# 	run-atpull \
+# 	light-mode for @neovim/neovim
+# 	#atclone"command cp -rf nvim*/* $ZPFX; echo "" > ._zinit/is_release" \
+# 	   from'gh-r' as'program' bpick'*AppImage*' mv'tmux* -> tmux' pick'tmux' \
+
 zinit wait'0' lucid nocompletions \
-	from'gh-r' ver'nightly' as'program' bpick'*tar.gz' \
-	pick'nvim*/bin/*' \
-	atclone"echo "" > ._zinit/is_release" \
-	atpull'%atclone' \
-	run-atpull \
+	from'gh-r' ver'nightly' as'program' \
+  bpick'*.appimage' \
+  atclone"command ./nvim.appimage --appimage-extract; rm ./nvim.appimage; \
+    cp -rf squashfs-root/usr/* $ZPFX; mkdir -p ~/.local/bin; ln -snf $ZPFX/bin/nvim ~/.local/bin/nvim; nvim --version > ._zinit/is_release" \
 	light-mode for @neovim/neovim
-	#atclone"command cp -rf nvim*/* $ZPFX; echo "" > ._zinit/is_release" \
+
+
+if command -v nvim &> /dev/null; then
+  alias vim="nvim"
+  alias vimdiff="nvim -d"
+elif command -v neovim &> /dev/null; then
+  alias vim="neovim"
+  alias vimdiff="neovim -d"
+fi
+
 
 # wezterm
 # test $(openssl version | awk '{print $2}' | awk -F '.' '{print $1}') -eq 1
@@ -349,18 +364,27 @@ zinit wait'2' lucid nocompletions \
 	#   for https://nodejs.org/download/release/latest/
 
 # tmux
-if ldconfig -p | grep -q 'libevent-' && ldconfig -p | grep -q 'libncurses'; then
- zinit wait'0' lucid \
-	   from"gh-r" as"program" bpick"tmux-*.tar.gz" pick"*/tmux" \
-	   atclone"cd tmux*/; ./configure; make" \
-	   atpull"%atclone" \
-	   light-mode for @tmux/tmux
-elif builtin command -v tmux > /dev/null 2>&1 && test $(echo "$(tmux -V | cut -d' ' -f2) <= "3.3"" | tr -d '[:alpha:]' | bc) -eq 1; then
- zinit wait'0' lucid \
-	   from'gh-r' as'program' bpick'*AppImage*' mv'tmux* -> tmux' pick'tmux' \
-	   light-mode for @tmux/tmux
-fi
+# if ldconfig -p | grep -q 'libevent-' && ldconfig -p | grep -q 'libncurses'; then
+#  zinit wait'0' lucid \
+# 	   from"gh-r" as"program" bpick"tmux-*.tar.gz" pick"*/tmux" \
+# 	   atclone"cd tmux*/; ./configure; make" \
+# 	   atpull"%atclone" \
+# 	   light-mode for @tmux/tmux
+# elif builtin command -v tmux > /dev/null 2>&1 && test $(echo "$(tmux -V | cut -d' ' -f2) <= "3.3"" | tr -d '[:alpha:]' | bc) -eq 1; then
+#  zinit wait'0' lucid \
+# 	   from'gh-r' as'program' bpick'*AppImage*' mv'tmux* -> tmux' pick'tmux' \
+# 	   light-mode for @tmux/tmux
+# fi
 
+if ! builtin command -v docker-image-extract > /dev/null 2>&1; then
+
+  zinit wait'0' lucid nocompile \
+    as='null|command' \
+    from"gh" \
+    pick'docker-image-extract' \
+    atclone"command cp -rf docker-image-extract $ZPFX/bin/ ;" \
+    light-mode for @jjlin/docker-image-extract
+fi
 # zinit wait'1' lucid \
 	#   as"program" \
 	#   pick'bin/*' \
@@ -467,9 +491,9 @@ fi
 #==============================================================#
 # completion
 #==============================================================#
-zinit wait'2' lucid silent \
-	atload"zicompinit; zicdreplay" \
-	light-mode for "$ZHOMEDIR/rc/myplugins/command_config.zsh"
+# zinit wait'2' lucid silent \
+# 	atload"zicompinit; zicdreplay" \
+# 	light-mode for "$ZHOMEDIR/rc/myplugins/command_config.zsh"
 
 
 #==============================================================#
@@ -482,3 +506,35 @@ zinit wait'2' lucid silent \
 # old plugins
 #==============================================================#
 
+# For downloading arbitrary assets from URLs
+# zi light @z-shell/z-a-readurl
+
+# https://github.com/AntoinePrv/dotfiles/blob/master/shell/zinit.zsh
+case "$(uname -s)" in
+	Darwin*)
+		conda_os="osx" ;;
+	Linux*)
+		conda_os="linux" ;;
+esac
+case "$(uname -m)" in
+	x86_64)
+		conda_arch="64" ;;
+esac 
+# micromamba is bound as both function and script because function is necessary for activation
+# but not visible in programs (maybe easier to simply add in PATH using cmd).
+zi ice lucid id-as='conda-forge/micromamba' as='readurl|command' extract \
+	pick="bin/micromamba" \
+	atload='eval "$(micromamba shell hook --shell zsh)"' \
+	dlink="/conda-forge/micromamba/%VERSION%/download/${conda_os}-${conda_arch}/micromamba-%VERSION%-*.tar.bz2"
+zi snippet 'https://anaconda.org/conda-forge/micromamba/files'
+export MAMBA_EXE="$(zi cd "conda-forge/micromamba" &> /dev/null && pwd)/bin/micromamba"
+
+zi ice wait compile lucid blockf
+zi light @zsh-users/zsh-completions
+
+# Should be loaded last and call again compinit after all (turbo) completion are loaded
+zi ice wait compile lucid atload='zicompinit; zicdreplay'
+zi light zdharma-continuum/fast-syntax-highlighting
+
+autoload -Uz compinit && compinit
+zi cdreplay
