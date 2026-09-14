@@ -1,19 +1,9 @@
-Include {{ .chezmoi.homeDir }}/.ssh/config_external
+# Machine-specific internal hosts are managed in the encrypted config_* files,
+# which are pulled in via config_external above.
 
-Host git.unibw.de
-  Port 2222
-  User git
-  HostName git.unibw.de
 Host github.com
   IdentitiesOnly yes
   IdentityFile {{ .chezmoi.homeDir }}/.ssh/id_github
-Host pontus
-  Port 22
-  ForwardAgent yes
-  IdentitiesOnly yes
-  User imansour
-  HostName pontus.lrt.unibw-muenchen.de
-  IdentityFile {{ .chezmoi.homeDir }}/.ssh/id_ed25519
 
 Host *
   ForwardAgent no
