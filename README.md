@@ -24,7 +24,7 @@ host `vega-air`). Adjust hostnames to match your machines.
 
 ## First-time setup (this machine)
 
-Encryption uses **age with a passphrase** (`[age] symmetric = true`), so no key
+Encryption uses **age with a passphrase** (`[age] passphrase = true`), so no key
 file is stored on disk. You'll be prompted for the passphrase each time chezmoi
 encrypts or decrypts — this is the secret protecting your private files.
 
@@ -40,7 +40,7 @@ mkdir -p ~/.config/chezmoi
 cat > ~/.config/chezmoi/chezmoi.toml <<'EOF'
 encryption = "age"
 [age]
-    symmetric = true
+    passphrase = true
 EOF
 
 # 3) Import your real ~/.gitconfig as an encrypted entry.
@@ -48,8 +48,9 @@ EOF
 $chezmoi add --force --encrypt ~/.gitconfig
 ```
 
-> `symmetric = true` with no identity/recipient tells chezmoi's age integration
-> to prompt for a passphrase interactively. No `key.txt`, no world-readable file.
+> `passphrase = true` makes chezmoi (via the external `age` binary on PATH)
+> prompt for a passphrase interactively each time it encrypts/decrypts.
+> No identity key, no recipient, nothing stored at rest.
 
 ## Manage the encrypted `.gitconfig`
 
