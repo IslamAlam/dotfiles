@@ -1,0 +1,10 @@
+# Managed by chezmoi, evaluated as a template on every machine.
+#
+# ~/.ssh/config is tracked as a normal (generic) file so it works on machines
+# WITHOUT Nix. On machines where ~/.ssh/config is already a symlink (e.g. it is
+# managed by Nix / home-manager), we ignore it here so we never clobber the
+# existing symlink — the detection uses lstat (returns nil for a missing file).
+{{- $st := lstat (joinPath .chezmoi.homeDir ".ssh/config") }}
+{{- if and $st (eq $st.type "symlink") }}
+.ssh/config
+{{- end }}

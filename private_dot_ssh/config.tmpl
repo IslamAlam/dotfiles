@@ -1,0 +1,28 @@
+Include {{ .chezmoi.homeDir }}/.ssh/config_external
+
+Host git.unibw.de
+  Port 2222
+  User git
+  HostName git.unibw.de
+Host github.com
+  IdentitiesOnly yes
+  IdentityFile {{ .chezmoi.homeDir }}/.ssh/id_github
+Host pontus
+  Port 22
+  ForwardAgent yes
+  IdentitiesOnly yes
+  User imansour
+  HostName pontus.lrt.unibw-muenchen.de
+  IdentityFile {{ .chezmoi.homeDir }}/.ssh/id_ed25519
+
+Host *
+  ForwardAgent no
+  AddKeysToAgent no
+  Compression no
+  ServerAliveInterval 0
+  ServerAliveCountMax 3
+  HashKnownHosts no
+  UserKnownHostsFile ~/.ssh/known_hosts
+  ControlMaster no
+  ControlPath ~/.ssh/master-%r@%n:%p
+  ControlPersist no

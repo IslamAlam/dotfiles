@@ -107,18 +107,29 @@ These become `private_dot_ssh/encrypted_config_*.age`.
 
 ### Public material — plain (safe to commit)
 ```sh
-$chezmoi add --force ~/.ssh/id_ed25519.pub \
-                    ~/.ssh/id_github.pub \
-                    ~/.ssh/id_ed25519_agenix.pub
-# known_hosts is machine-local; skip it unless you want to share it.
+$chezmoi add --force ~/.ssh/id_ed25519.pub
+# (Only id_ed25519 is tracked. id_devman / id_github / id_ed25519_agenix /
+#  id_ed25519_old are intentionally NOT tracked.)
 ```
 
-> Note: your top-level `~/.ssh/config` is a symlink into the Nix store (home-manager)
-on this machine, so leave it unmanaged by chezmoi here. The custom `config_*` files it
-`Include`s are what gets tracked.
+### Generic `~/.ssh/config` — normal file, skipped when it's a symlink
+Tracked as `private_dot_ssh/config.tmpl` (a **normal, non-encrypted** file so it
+works on machines without Nix). A templated `.chezmoiignore` makes chezmoi **skip
+it whenever `~/.ssh/config` is already a symlink** (e.g. Nix / home-manager
+manages it there), so it's only applied as a real file where one isn't present.
+Detection uses `lstat` (returns nil for a missing file, so fresh machines are safe).
+```sh
+$chezmoi add --force ~/.ssh/config   # only if you later change it; normally managed as-is
+```
+
+> Note: your top-level `~/.ssh/config` on this machine is a symlink into the Nix
+> store, so it's currently **ignored** here and applied only on non-Nix machines.
 
 ## Notes / decisions
 - `~/.gitconfig` is managed as an age-passphrase-encrypted, private entry. Never
   commit its plaintext.
+- `~/.ssh/config` is a normal (non-encrypted) file, auto-skipped wherever it is a
+  Nix/home-manager symlink.
+- Only `id_ed25519` is tracked; the other SSH private keys are left out on purpose.
 - ghostty / tmux / nvim are intentionally left out of this repo to keep it
   focused on shell config — ask and I'll add them if you want them here too.
