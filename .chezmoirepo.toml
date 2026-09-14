@@ -1,0 +1,7 @@
+# chezmoi repo marker/config.
+#
+# Tells chezmoi to use age for encryption of `private_*` files that end in
+# `.tmpl.age`. The recipient/identity is configured at apply time via the user's
+# ~/.config/chezmoi/chezmoi.toml (see README).
+
+encryption = "age"

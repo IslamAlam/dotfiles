@@ -1,0 +1,8 @@
+# Non-secret, per-machine data consumed by chezmoi templates.
+#
+# Machine-specific branches in templates use {{ .chezmoi.hostname }} directly;
+# add host entries here only if you need custom per-host variables.
+
+hosts:
+  # Current machine. Add other machines (e.g. a desktop or server) as needed.
+  vega-air: {}

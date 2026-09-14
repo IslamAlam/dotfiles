@@ -1,0 +1,160 @@
+# ============================================================================
+# ~/.zshrc — managed by chezmoi (dot_zshrc.tmpl)
+#
+# The config adapts at shell-load time based on whether a Nix installation
+# is present:
+#
+#   * NIX present  -> full configuration: loads Nix profiles + powerlevel10k,
+#                     then sources ~/.zshrc.d/zinit.zsh for plugin/tool mgmt.
+#   * NO nix       -> lean, dependency-free .zshrc that still pulls in
+#                     ~/.zshrc.d/zinit.zsh when available and sets up common
+#                     history/editor/aliases without Nix-specific bits.
+#
+# Paths that differ per-machine are templated by chezmoi at apply time:
+#   {{ .chezmoi.homeDir }}  -> $HOME
+#   {{ .chezmoi.username }} -> login username
+# ============================================================================
+
+typeset -U path cdpath fpath manpath
+
+# --- Detect Nix ---------------------------------------------------------------
+if [[ -d /nix/store && ( -f /etc/nixos/configuration.nix || -x "$(command -v nix 2>/dev/null)" ) ]]; then
+    _HAS_NIX=1
+else
+    _HAS_NIX=0
+fi
+
+# ============================================================================
+# COMMON SETTINGS (applied in both branches)
+# ============================================================================
+
+cdpath+=(~/.local/share/src)
+
+# History options. Set here so they apply after oh-my-zsh sourcing.
+HISTSIZE="10000"
+SAVEHIST="10000"
+
+if (( _HAS_NIX )); then
+    HISTFILE="{{ .chezmoi.homeDir }}/.zsh_history"
+else
+    HISTFILE="${ZDOTDIR:-$HOME}/.zsh_history"
+fi
+mkdir -p "$(dirname "$HISTFILE")"
+
+setopt HIST_FCNTL_LOCK
+unsetopt APPEND_HISTORY
+setopt HIST_IGNORE_DUPS
+unsetopt HIST_IGNORE_ALL_DUPS
+unsetopt HIST_SAVE_NO_DUPS
+unsetopt HIST_FIND_NO_DUPS
+setopt HIST_IGNORE_SPACE
+unsetopt HIST_EXPIRE_DUPS_FIRST
+setopt SHARE_HISTORY
+unsetopt EXTENDED_HISTORY
+
+# Remove history data we don't want to see.
+export HISTIGNORE="pwd:ls:cd"
+
+# Emacs is my editor.
+export ALTERNATE_EDITOR=""
+export EDITOR="emacsclient -t"
+export VISUAL="emacsclient -c -a emacs"
+
+e() {
+    emacsclient -t "$@"
+}
+
+# Common PATH additions (present in both branches).
+export PATH="$HOME/.pnpm-packages/bin:$HOME/.pnpm-packages:$PATH"
+export PATH="$HOME/.npm-packages/bin:$HOME/bin:$PATH"
+export PATH="$HOME/.local/share/bin:$PATH"
+
+# ============================================================================
+if (( _HAS_NIX )); then
+    # --------------------------------------------------------------------------
+    # NIX BRANCH — keep the full setup as it is.
+    # --------------------------------------------------------------------------
+
+    for profile in ${(z)NIX_PROFILES}; do
+        fpath+=($profile/share/zsh/site-functions $profile/share/zsh/$ZSH_VERSION/functions $profile/share/zsh/vendor-completions)
+    done
+
+    HELPDIR="/nix/store/5sczd2lalpwsfppk8kyygh0arfkv9zz0-zsh-5.9/share/zsh/$ZSH_VERSION/help"
+
+    path+="{{ .chezmoi.homeDir }}/.zsh/plugins/powerlevel10k"
+    fpath+="{{ .chezmoi.homeDir }}/.zsh/plugins/powerlevel10k"
+
+    path+="{{ .chezmoi.homeDir }}/.zsh/plugins/powerlevel10k-config"
+    fpath+="{{ .chezmoi.homeDir }}/.zsh/plugins/powerlevel10k-config"
+
+    autoload -U compinit && compinit
+    if [[ -f "{{ .chezmoi.homeDir }}/.zsh/plugins/powerlevel10k/share/zsh-powerlevel10k/powerlevel10k.zsh-theme" ]]; then
+        source "{{ .chezmoi.homeDir }}/.zsh/plugins/powerlevel10k/share/zsh-powerlevel10k/powerlevel10k.zsh-theme"
+    fi
+    if [[ -f "{{ .chezmoi.homeDir }}/.zsh/plugins/powerlevel10k-config/p10k.zsh" ]]; then
+        source "{{ .chezmoi.homeDir }}/.zsh/plugins/powerlevel10k-config/p10k.zsh"
+    fi
+
+    # Load zinit config.
+    if [[ -f ~/.zshrc.d/zinit.zsh ]]; then
+        source ~/.zshrc.d/zinit.zsh
+    fi
+
+    if [[ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]]; then
+        . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+        . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
+    fi
+
+else
+    # --------------------------------------------------------------------------
+    # NON-NIX BRANCH — lean, dependency-free fallback.
+    # --------------------------------------------------------------------------
+
+    autoload -U compinit && compinit
+
+    # Load zinit config if it exists (installed independently of Nix).
+    if [[ -f ~/.zshrc.d/zinit.zsh ]]; then
+        source ~/.zshrc.d/zinit.zsh
+    fi
+
+fi
+
+
+# ============================================================================
+# SHARED ALIASES & TOOLS (both branches)
+# ============================================================================
+
+# Ripgrep alias.
+alias search=rg -p --glob '!node_modules/*'  $@
+
+# pnpm is a javascript package manager.
+alias pn=pnpm
+alias px=pnpx
+
+# Use difftastic, syntax-aware diffing.
+alias diff=difft
+
+# Always color ls and group directories.
+if (( _HAS_NIX )); then
+    alias ls='ls --color=auto'
+else
+    # On macOS/BSD systems prefer lsd if available, else plain colored ls.
+    if command -v lsd >/dev/null 2>&1; then
+        alias ls='lsd --group-directories-first'
+        alias ll='ls -lA --header'
+        alias tree='ls --tree'
+    elif [[ "$(uname)" == "Darwin" ]]; then
+        alias ls='ls -G'
+    else
+        alias ls='ls --color=auto'
+    fi
+fi
+
+# nix shortcuts (only meaningful when Nix is present).
+if (( _HAS_NIX )); then
+    shell() {
+        nix-shell '<nixpkgs>' -A "$1"
+    }
+fi
+
+unset _HAS_NIX
