@@ -94,7 +94,7 @@ $chezmoi add --force --encrypt ~/.ssh/id_ed25519 \
                             ~/.ssh/id_ed25519_agenix \
                             ~/.ssh/id_ed25519_old
 ```
-These become `dot_ssh/encrypted_id_*.age`.
+These become `private_dot_ssh/encrypted_private_id_*.age`.
 
 ### Custom configs (`~/.ssh/config_*`) — encrypt (contain host/proxy info)
 ```sh
@@ -103,7 +103,7 @@ $chezmoi add --force --encrypt ~/.ssh/config_personal \
                             ~/.ssh/config_tailscale \
                             ~/.ssh/config_unibw
 ```
-These become `dot_ssh/encrypted_config_*.age`.
+These become `private_dot_ssh/encrypted_config_*.age`.
 
 ### Public material — plain (safe to commit)
 ```sh
