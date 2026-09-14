@@ -80,6 +80,43 @@ $chezmoi apply -v
 $chezmoi add ~/.zshrc.d/something.zsh
 ```
 
+## SSH config & keys (encrypted)
+
+Private SSH material is managed the same way as `.gitconfig`: age-passphrase-encrypted,
+never committed in plaintext. Run these interactively so chezmoi can prompt for your passphrase.
+(You'll be asked each time; a small loop prompts once per file.)
+
+### Private keys — encrypt (`add --force --encrypt`)
+```sh
+$chezmoi add --force --encrypt ~/.ssh/id_ed25519 \
+                            ~/.ssh/id_devman \
+                            ~/.ssh/id_github \
+                            ~/.ssh/id_ed25519_agenix \
+                            ~/.ssh/id_ed25519_old
+```
+These become `dot_ssh/encrypted_id_*.age`.
+
+### Custom configs (`~/.ssh/config_*`) — encrypt (contain host/proxy info)
+```sh
+$chezmoi add --force --encrypt ~/.ssh/config_personal \
+                            ~/.ssh/config_external \
+                            ~/.ssh/config_tailscale \
+                            ~/.ssh/config_unibw
+```
+These become `dot_ssh/encrypted_config_*.age`.
+
+### Public material — plain (safe to commit)
+```sh
+$chezmoi add --force ~/.ssh/id_ed25519.pub \
+                    ~/.ssh/id_github.pub \
+                    ~/.ssh/id_ed25519_agenix.pub
+# known_hosts is machine-local; skip it unless you want to share it.
+```
+
+> Note: your top-level `~/.ssh/config` is a symlink into the Nix store (home-manager)
+on this machine, so leave it unmanaged by chezmoi here. The custom `config_*` files it
+`Include`s are what gets tracked.
+
 ## Notes / decisions
 - `~/.gitconfig` is managed as an age-passphrase-encrypted, private entry. Never
   commit its plaintext.
