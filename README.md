@@ -24,6 +24,10 @@ host `vega-air`). Adjust hostnames to match your machines.
 
 ## First-time setup (this machine)
 
+Encryption uses **age with a passphrase** (`[age] symmetric = true`), so no key
+file is stored on disk. You'll be prompted for the passphrase each time chezmoi
+encrypts or decrypts — this is the secret protecting your private files.
+
 ```sh
 # chezmoi is installed via zinit at:
 chezmoi=$HOME/.local/share/zinit/plugins/twpayne---chezmoi/chezmoi
@@ -31,35 +35,36 @@ chezmoi=$HOME/.local/share/zinit/plugins/twpayne---chezmoi/chezmoi
 # 1) Point chezmoi at this repo as its source directory.
 $chezmoi init --source "$PWD"
 
-# 2) Configure age encryption + generate an identity (one-time).
+# 2) Enable age passphrase encryption (one-time).
 mkdir -p ~/.config/chezmoi
-age-keygen > ~/.config/chezmoi/key.txt          # or: chezmoi generate age-key
-chmod 600 ~/.config/chezmoi/key.txt
-
-#   The key.txt comment line prints the public "recipient" — add it to config:
-cat >> ~/.config/chezmoi/chezmoi.toml <<'EOF'
+cat > ~/.config/chezmoi/chezmoi.toml <<'EOF'
 encryption = "age"
 [age]
-    identity = "~/.config/chezmoi/key.txt"
-    recipient = "<paste your age1... public key here>"
+    symmetric = true
 EOF
+
+# 3) Import your real ~/.gitconfig as an encrypted entry.
+#    You'll be prompted to set a passphrase (twice). Remember it!
+$chezmoi add --force --encrypt ~/.gitconfig
 ```
 
-## Manage the encrypted `.gitconfig` (never store secrets in git)
+> `symmetric = true` with no identity/recipient tells chezmoi's age integration
+> to prompt for a passphrase interactively. No `key.txt`, no world-readable file.
 
-Because `private_encrypted_dot_gitconfig…age` is an age-encrypted blob, you never
-hand-write it. Edit it through chezmoi so it decrypts/re-encrypts transparently:
+## Manage the encrypted `.gitconfig`
+
+The entry lives in source as an armored blob (`private_encrypted_dot_gitconfig…age`)
+and is never written as plaintext. Edit it through chezmoi so decrypt/re-encrypt
+happens transparently (you'll be asked for the passphrase):
 
 ```sh
-# Import the real ~/.gitconfig from home into the repo (creates/updates the .age file).
+$chezmoi edit-encrypted .gitconfig   # decrypt -> $EDITOR -> re-encrypt
+# or refresh from home:
 $chezmoi add --force --encrypt ~/.gitconfig
-
-# Or edit the encrypted entry in place.
-$chezmoi edit-encrypted .gitconfig      # decrypt -> $EDITOR -> re-encrypt
 ```
 
-The raw signing key and `credential.helper = store` live only inside that
-armored file — nothing sensitive is ever committed to this repository.
+The signing key and `credential.helper = store` live only inside that armored
+file — nothing sensitive is ever committed to this repository.
 
 ## Daily workflow
 
@@ -67,7 +72,7 @@ armored file — nothing sensitive is ever committed to this repository.
 # Preview what would change.
 $chezmoi diff
 
-# Apply changes to your home directory.
+# Apply changes to your home directory (prompts for passphrase).
 $chezmoi apply -v
 
 # Track a new non-secret file from $HOME into the repo (edit then re-run).
@@ -75,7 +80,7 @@ $chezmoi add ~/.zshrc.d/something.zsh
 ```
 
 ## Notes / decisions
-- `~/.gitconfig` is managed as an age-encrypted, private entry. Never commit its
-  plaintext.
+- `~/.gitconfig` is managed as an age-passphrase-encrypted, private entry. Never
+  commit its plaintext.
 - ghostty / tmux / nvim are intentionally left out of this repo to keep it
   focused on shell config — ask and I'll add them if you want them here too.
